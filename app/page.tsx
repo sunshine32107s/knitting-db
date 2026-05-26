@@ -84,7 +84,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-tr from-sky-100 via-blue-50 to-emerald-50 p-8 text-gray-800 font-sans tracking-wide">
+    <div className="min-h-screen bg-gradient-to-tr from-sky-100 via-blue-50 to-emerald-50 p-8 text-gray-900 font-sans tracking-wide">
       
       {/* 구글 웹폰트 'Gowun Dodum' (고운 돋움) 불러오기 */}
       <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet" />
@@ -94,7 +94,7 @@ export default function Home() {
         }
       `}</style>
 
-      <div className="max-w-7xl mx-auto space-y-8 custom-cute-font text-base">
+      <div className="max-w-7xl mx-auto space-y-6 custom-cute-font text-base">
         
         {/* 대제목 영역 */}
         <div>
@@ -102,26 +102,26 @@ export default function Home() {
           <p className="text-sm text-sky-600/80 mt-1">도안을 업로드하면 AI가 정리해 줍니다. 직접 수정도 가능해요!</p>
         </div>
 
-        {/* 파일 업로드 영역 */}
+        {/* 슬림해진 업로드 창 */}
         <div 
           onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
           onDragLeave={() => setDragActive(false)}
           onDrop={(e) => { e.preventDefault(); setDragActive(false); if(e.dataTransfer.files?.[0]) handleFileUpload(e.dataTransfer.files[0]); }}
-          className={`border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition-all shadow-sm ${
+          className={`border-2 border-dashed rounded-xl p-3.5 text-center cursor-pointer transition-all shadow-sm ${
             dragActive ? 'border-sky-400 bg-sky-50/50' : 'border-sky-200 bg-white/80 backdrop-blur-sm hover:border-sky-300'
           }`}
           onClick={() => document.getElementById('fileInput')?.click()}
         >
           <input id="fileInput" type="file" accept="image/*,application/pdf" className="hidden" onChange={(e) => { if(e.target.files?.[0]) handleFileUpload(e.target.files[0]); }} />
           {loading ? (
-            <div className="flex flex-col items-center justify-center gap-2">
-              <Loader2 className="w-7 h-7 text-sky-500 animate-spin" />
+            <div className="flex items-center justify-center gap-2 py-1">
+              <Loader2 className="w-5 h-5 text-sky-500 animate-spin" />
               <p className="text-sm font-medium text-sky-800">AI가 도안을 열심히 읽고 있어요...</p>
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center gap-1.5">
-              <Upload className="w-7 h-7 text-sky-400" />
-              <p className="text-sm font-medium text-sky-700">여기에 도안 이미지나 PDF를 올려주세요. 채우는 건 AI가 할게요!</p>
+            <div className="flex items-center justify-center gap-2 py-1">
+              <Upload className="w-5 h-5 text-sky-400" />
+              <p className="text-sm font-medium text-gray-700">여기에 도안 이미지나 PDF를 올려주세요. 채우는 건 AI가 할게요!</p>
             </div>
           )}
         </div>
@@ -129,47 +129,44 @@ export default function Home() {
         {/* 도안 테이블 영역 */}
         <div className="bg-white/95 backdrop-blur-sm border border-sky-100 rounded-2xl overflow-hidden shadow-md">
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse table-fixed min-w-[900px]">
+            <table className="w-full border-collapse table-fixed min-w-[900px]">
               <thead>
-                {/* 제목행 우측 정렬 대신text-center(가운데정렬) 클래스 부여 */}
-                <tr className="bg-sky-50/70 border-b border-sky-100 text-sky-900 font-bold text-center">
+                {/* 제목행 짙은 푸른색 계열(text-sky-900) 유지 및 가운데 정렬 */}
+                <tr className="bg-sky-50/70 border-b border-sky-100 text-sky-950 font-bold text-center text-base">
                   <th className="p-3 border-r border-sky-100 w-[22%]">이름</th>
                   <th className="p-3 border-r border-sky-100 w-[12%]">게이지</th>
                   <th className="p-3 border-r border-sky-100 w-[13%]">종류</th>
                   <th className="p-3 border-r border-sky-100 w-[15%]">원작 실</th>
                   <th className="p-3 border-r border-sky-100 w-[15%]">원작 실 성분</th>
-                  <th className="p-3 border-r border-sky-100 w-[15%]">비고</th>
+                  <th className="p-3 border-r border-sky-100 w-[15%]">특징</th>
                   <th className="p-3 border-r border-sky-100 w-[8%]">착샷</th>
                   <th className="p-3 w-[5%]">삭제</th>
                 </tr>
               </thead>
               <tbody>
                 {patterns.map((pattern) => (
-                  <tr key={pattern.id} className="border-b border-sky-50 hover:bg-sky-50/30 transition-colors">
+                  <tr key={pattern.id} className="border-b border-sky-50 hover:bg-sky-50/30 transition-colors text-base">
                     
-                    {/* 이름 */}
-                    <td className="p-2 border-r border-sky-100 whitespace-pre-wrap break-all">
-                      <textarea rows={1} value={pattern.name} onChange={(e) => handleCellChange(pattern.id, 'name', e.target.value)} className="w-full bg-transparent px-2 py-1 font-bold text-sky-700 focus:bg-white focus:outline-sky-200 resize-none rounded overflow-hidden" />
+                    {/* 이름: 원래의 예쁜 푸른색 계열(text-blue-600)과 두께감을 뚜렷하게 복원 */}
+                    <td className="p-2 border-r border-sky-100 whitespace-pre-wrap break-all text-center">
+                      <textarea rows={1} value={pattern.name} onChange={(e) => handleCellChange(pattern.id, 'name', e.target.value)} className="w-full bg-transparent px-2 py-1 font-bold text-blue-600 text-center focus:bg-white focus:outline-sky-200 resize-none rounded overflow-hidden" />
                     </td>
-                    {/* 게이지 */}
-                    <td className="p-2 border-r border-sky-100 whitespace-pre-wrap break-all">
-                      <textarea rows={1} value={pattern.gauge} onChange={(e) => handleCellChange(pattern.id, 'gauge', e.target.value)} className="w-full bg-transparent px-2 py-1 text-gray-700 focus:bg-white focus:outline-sky-200 text-center resize-none rounded overflow-hidden" />
+                    
+                    {/* 게이지 및 기타 세부 항목: 흐릿함을 없애고 선명하게 인지되도록 굵은 font-medium 및 또렷한 차콜블랙 설정 */}
+                    <td className="p-2 border-r border-sky-100 whitespace-pre-wrap break-all text-center">
+                      <textarea rows={1} value={pattern.gauge} onChange={(e) => handleCellChange(pattern.id, 'gauge', e.target.value)} className="w-full bg-transparent px-2 py-1 font-semibold text-gray-900 text-center focus:bg-white focus:outline-sky-200 resize-none rounded overflow-hidden" />
                     </td>
-                    {/* 종류 */}
-                    <td className="p-2 border-r border-sky-100 whitespace-pre-wrap break-all">
-                      <textarea rows={1} value={pattern.type} onChange={(e) => handleCellChange(pattern.id, 'type', e.target.value)} className="w-full bg-transparent px-2 py-1 text-gray-700 focus:bg-white focus:outline-sky-200 text-center resize-none rounded overflow-hidden" />
+                    <td className="p-2 border-r border-sky-100 whitespace-pre-wrap break-all text-center">
+                      <textarea rows={1} value={pattern.type} onChange={(e) => handleCellChange(pattern.id, 'type', e.target.value)} className="w-full bg-transparent px-2 py-1 font-semibold text-gray-900 text-center focus:bg-white focus:outline-sky-200 resize-none rounded overflow-hidden" />
                     </td>
-                    {/* 원작실 */}
-                    <td className="p-2 border-r border-sky-100 whitespace-pre-wrap break-all">
-                      <textarea rows={1} value={pattern.yarn} onChange={(e) => handleCellChange(pattern.id, 'yarn', e.target.value)} className="w-full bg-transparent px-2 py-1 text-gray-700 focus:bg-white focus:outline-sky-200 resize-none rounded overflow-hidden" />
+                    <td className="p-2 border-r border-sky-100 whitespace-pre-wrap break-all text-center">
+                      <textarea rows={1} value={pattern.yarn} onChange={(e) => handleCellChange(pattern.id, 'yarn', e.target.value)} className="w-full bg-transparent px-2 py-1 font-semibold text-gray-900 text-center focus:bg-white focus:outline-sky-200 resize-none rounded overflow-hidden" />
                     </td>
-                    {/* 성분 */}
-                    <td className="p-2 border-r border-sky-100 whitespace-pre-wrap break-all">
-                      <textarea rows={1} value={pattern.yarnComponent} onChange={(e) => handleCellChange(pattern.id, 'yarnComponent', e.target.value)} className="w-full bg-transparent px-2 py-1 text-gray-700 focus:bg-white focus:outline-sky-200 resize-none rounded overflow-hidden" />
+                    <td className="p-2 border-r border-sky-100 whitespace-pre-wrap break-all text-center">
+                      <textarea rows={1} value={pattern.yarnComponent} onChange={(e) => handleCellChange(pattern.id, 'yarnComponent', e.target.value)} className="w-full bg-transparent px-2 py-1 font-semibold text-gray-900 text-center focus:bg-white focus:outline-sky-200 resize-none rounded overflow-hidden" />
                     </td>
-                    {/* 비고 */}
-                    <td className="p-2 border-r border-sky-100 whitespace-pre-wrap break-all">
-                      <textarea rows={1} value={pattern.note} onChange={(e) => handleCellChange(pattern.id, 'note', e.target.value)} className="w-full bg-transparent px-2 py-1 text-gray-600 text-sm focus:bg-white focus:outline-sky-200 resize-none rounded overflow-hidden" />
+                    <td className="p-2 border-r border-sky-100 whitespace-pre-wrap break-all text-center">
+                      <textarea rows={1} value={pattern.note} onChange={(e) => handleCellChange(pattern.id, 'note', e.target.value)} className="w-full bg-transparent px-2 py-1 font-semibold text-gray-800 text-center focus:bg-white focus:outline-sky-200 resize-none rounded overflow-hidden" />
                     </td>
                     
                     {/* 착샷 */}
@@ -178,7 +175,7 @@ export default function Home() {
                         {pattern.imageUrl ? (
                           <img src={pattern.imageUrl} alt="preview" className="w-10 h-10 object-cover rounded-lg border border-sky-200 shadow-sm" />
                         ) : (
-                          <span className="text-gray-300 text-sm">-</span>
+                          <span className="text-gray-400">-</span>
                         )}
                       </div>
                     </td>
