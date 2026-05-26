@@ -126,7 +126,7 @@ export default function Home() {
                   (e.target as HTMLImageElement).src = "https://cdn-icons-png.flaticon.com/512/17510/17510100.png";
                 }}
               />
-              <p className="text-sm font-medium text-sky-800">고래가 도안을 열심히 읽고 있어요!</p>
+              <p className="text-sm font-medium text-sky-800">고래가 도안을 열심히 읽고 있어요...</p>
             </div>
           ) : (
             <div className="flex items-center justify-center gap-2 py-1">
