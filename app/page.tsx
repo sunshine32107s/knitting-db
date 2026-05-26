@@ -99,7 +99,7 @@ export default function Home() {
         {/* 대제목 영역 */}
         <div>
           <h1 className="text-3xl font-bold text-sky-900 tracking-tight">도안 저장소</h1>
-          <p className="text-sm text-sky-600/80 mt-1">도안을 업로드하면 AI가 정리해 줍니다. 직접 수정도 가능해요!</p>
+          <p className="text-sm text-sky-600/80 mt-1">도안을 업로드하면 AI가 정리해 줍니다. 직접 수정도 가능해요🐳!</p>
         </div>
 
         {/* 슬림해진 업로드 창 */}
@@ -146,34 +146,31 @@ export default function Home() {
                 {patterns.map((pattern) => (
                   <tr key={pattern.id} className="border-b border-sky-50 hover:bg-sky-50/30 transition-colors text-base">
                     
-                    {/* 이름: 강조되어야 하므로 기존의 선명한 볼드 블루 유지 */}
+                    {/* 이름: 선명한 블루, 볼드 유지 */}
                     <td className="p-2 border-r border-sky-100 text-center">
                       <input type="text" value={pattern.name} onChange={(e) => handleCellChange(pattern.id, 'name', e.target.value)} className="w-full bg-transparent px-2 py-1 font-bold text-blue-600 text-center focus:bg-white focus:outline-sky-200 rounded" />
                     </td>
                     
-                    {/* 게이지: font-medium(일반 두께)으로 완화하고 색상을 text-gray-700으로 부드럽게 조정 */}
+                    {/* 세부항목: 직전에 가장 마음에 들어하셨던 선명한 진한 색상(text-gray-900)으로 완벽 롤백 */}
                     <td className="p-2 border-r border-sky-100 text-center">
-                      <input type="text" value={pattern.gauge} onChange={(e) => handleCellChange(pattern.id, 'gauge', e.target.value)} className="w-full bg-transparent px-2 py-1 font-medium text-gray-700 text-center focus:bg-white focus:outline-sky-200 rounded" />
+                      <input type="text" value={pattern.gauge} onChange={(e) => handleCellChange(pattern.id, 'gauge', e.target.value)} className="w-full bg-transparent px-2 py-1 font-medium text-gray-900 text-center focus:bg-white focus:outline-sky-200 rounded" />
                     </td>
 
-                    {/* 종류 */}
                     <td className="p-2 border-r border-sky-100 text-center">
-                      <input type="text" value={pattern.type} onChange={(e) => handleCellChange(pattern.id, 'type', e.target.value)} className="w-full bg-transparent px-2 py-1 font-medium text-gray-700 text-center focus:bg-white focus:outline-sky-200 rounded" />
+                      <input type="text" value={pattern.type} onChange={(e) => handleCellChange(pattern.id, 'type', e.target.value)} className="w-full bg-transparent px-2 py-1 font-medium text-gray-900 text-center focus:bg-white focus:outline-sky-200 rounded" />
                     </td>
 
-                    {/* 원작실 */}
                     <td className="p-2 border-r border-sky-100 text-center">
-                      <input type="text" value={pattern.yarn} onChange={(e) => handleCellChange(pattern.id, 'yarn', e.target.value)} className="w-full bg-transparent px-2 py-1 font-medium text-gray-700 text-center focus:bg-white focus:outline-sky-200 rounded" />
+                      <input type="text" value={pattern.yarn} onChange={(e) => handleCellChange(pattern.id, 'yarn', e.target.value)} className="w-full bg-transparent px-2 py-1 font-medium text-gray-900 text-center focus:bg-white focus:outline-sky-200 rounded" />
                     </td>
 
-                    {/* 성분 */}
                     <td className="p-2 border-r border-sky-100 text-center">
-                      <input type="text" value={pattern.yarnComponent} onChange={(e) => handleCellChange(pattern.id, 'yarnComponent', e.target.value)} className="w-full bg-transparent px-2 py-1 font-medium text-gray-700 text-center focus:bg-white focus:outline-sky-200 rounded" />
+                      <input type="text" value={pattern.yarnComponent} onChange={(e) => handleCellChange(pattern.id, 'yarnComponent', e.target.value)} className="w-full bg-transparent px-2 py-1 font-medium text-gray-900 text-center focus:bg-white focus:outline-sky-200 rounded" />
                     </td>
 
-                    {/* 특징: 부연설명이므로 약간 더 은은한 text-gray-600 적용 */}
+                    {/* 특징: 부연설명도 선명함을 주되 조화를 위해 살짝만 다듬은 text-gray-900 계열 유지 */}
                     <td className="p-2 border-r border-sky-100 text-center">
-                      <input type="text" value={pattern.note} onChange={(e) => handleCellChange(pattern.id, 'note', e.target.value)} className="w-full bg-transparent px-2 py-1 font-medium text-gray-600 text-center focus:bg-white focus:outline-sky-200 rounded" />
+                      <input type="text" value={pattern.note} onChange={(e) => handleCellChange(pattern.id, 'note', e.target.value)} className="w-full bg-transparent px-2 py-1 font-medium text-gray-900 text-center focus:bg-white focus:outline-sky-200 rounded" />
                     </td>
                     
                     {/* 착샷 */}
