@@ -1,14 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { Upload, Loader2, Plus } from 'lucide-react';
+import { Upload, Loader2, Plus, Trash2 } from 'lucide-react';
 
 interface Pattern {
   id: number;
   name: string;
   gauge: string;
   type: string;
-  amount: string;
   yarn: string;
   yarnComponent: string;
   note: string;
@@ -16,10 +15,10 @@ interface Pattern {
 }
 
 const initialData: Pattern[] = [
-  { id: 1, name: '울알코 브이넥 조끼', gauge: '11.5*17', type: '조끼', amount: '', yarn: '', yarnComponent: '', note: '' },
-  { id: 2, name: 'Calais', gauge: '11.5*18', type: '대바늘 소품', amount: '', yarn: '', yarnComponent: '', note: '영어 / 망토' },
-  { id: 3, name: '레인드롭티', gauge: '12*17', type: '스웨터', amount: '780', yarn: '레이니', yarnComponent: '', note: '' },
-  { id: 4, name: 'Church of Clouds', gauge: '12*19', type: '스웨터', amount: '', yarn: '', yarnComponent: '', note: '영어 / 목' },
+  { id: 1, name: '울알코 브이넥 조끼', gauge: '11.5*17', type: '조끼', yarn: '', yarnComponent: '', note: '' },
+  { id: 2, name: 'Calais', gauge: '11.5*18', type: '대바늘 소품', yarn: '', yarnComponent: '', note: '영어 / 망토' },
+  { id: 3, name: '레인드롭티', gauge: '12*17', type: '스웨터', yarn: '레이니', yarnComponent: '', note: '' },
+  { id: 4, name: 'Church of Clouds', gauge: '12*19', type: '스웨터', yarn: '', yarnComponent: '', note: '영어 / 목' },
 ];
 
 export default function Home() {
@@ -27,13 +26,28 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
 
+  // 이미지 파일을 Base64 문자열로 변환하여 브라우저에 임시 저장하는 함수 (착샷 노출용)
+  const fileToDataUrl = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (end) => resolve(end.target?.result as string);
+      reader.onerror = (error) => reject(error);
+      reader.readAsDataURL(file);
+    });
+  };
+
   const handleFileUpload = async (file: File) => {
     setLoading(true);
     const formData = new FormData();
     formData.append('file', file);
-    const fakeImageUrl = URL.createObjectURL(file);
 
     try {
+      // 착샷용 이미지 미리보기 데이터 생성
+      let imageUrl = '';
+      if (file.type.startsWith('image/')) {
+        imageUrl = await fileToDataUrl(file);
+      }
+
       const response = await fetch('/api/analyze', {
         method: 'POST',
         body: formData,
@@ -44,14 +58,13 @@ export default function Home() {
 
       const newPattern: Pattern = {
         id: Date.now(),
-        name: aiResult.name || '이름 없음',
+        name: aiResult.name || '새 도안 항목',
         gauge: aiResult.gauge || '-',
         type: aiResult.type || '미분류',
-        amount: aiResult.amount || '-',
         yarn: aiResult.yarn || '-',
         yarnComponent: aiResult.yarnComponent || '-',
         note: aiResult.note || '-',
-        imageUrl: fakeImageUrl
+        imageUrl: imageUrl || undefined
       };
 
       setPatterns((prev) => [newPattern, ...prev]);
@@ -62,12 +75,23 @@ export default function Home() {
     }
   };
 
+  // 실시간 텍스트 수정 기능 함수
+  const handleCellChange = (id: number, field: keyof Pattern, value: string) => {
+    setPatterns((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, [field]: value } : item))
+    );
+  };
+
+  const deleteRow = (id: number) => {
+    setPatterns((prev) => prev.filter((item) => item.id !== id));
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 p-8 text-gray-800">
       <div className="max-w-7xl mx-auto space-y-8">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">📚 나의 독서DB & 도안 저장소</h1>
-          <p className="text-sm text-gray-500 mt-1">도안 파일을 드래그하여 업로드하면 AI가 자동으로 표를 채워줍니다.</p>
+          <p className="text-sm text-gray-500 mt-1">칸을 클릭하면 내용을 직접 수정할 수 있습니다. 도안을 올리면 AI가 자동으로 채워줍니다.</p>
         </div>
 
         <div 
@@ -101,31 +125,53 @@ export default function Home() {
                   <th className="p-3 pl-5 border-r border-gray-200 w-1/4">Aa 이름</th>
                   <th className="p-3 border-r border-gray-200">📊 게이지</th>
                   <th className="p-3 border-r border-gray-200">🧥 종류</th>
-                  <th className="p-3 border-r border-gray-200">⚖️ 소요량(m)</th>
                   <th className="p-3 border-r border-gray-200">🗒️ 원작 실</th>
                   <th className="p-3 border-r border-gray-200">🗒️ 원작 실 성분</th>
                   <th className="p-3 border-r border-gray-200">💬 비고</th>
-                  <th className="p-3 pl-4">🔗 착샷</th>
+                  <th className="p-3 border-r border-gray-200 text-center w-16">🔗 착샷</th>
+                  <th className="p-3 text-center w-12">삭제</th>
                 </tr>
               </thead>
               <tbody>
                 {patterns.map((pattern) => (
                   <tr key={pattern.id} className="border-b border-gray-150 hover:bg-gray-50 transition-colors">
-                    <td className="p-3 pl-5 font-semibold text-blue-600 border-r border-gray-200">{pattern.name}</td>
-                    <td className="p-3 text-gray-600 border-r border-gray-200">{pattern.gauge}</td>
-                    <td className="p-3 border-r border-gray-200">
-                      <span className={`px-2 py-0.5 rounded text-xs font-medium ${
-                        pattern.type === '스웨터' ? 'bg-green-100 text-green-800' :
-                        pattern.type === '가디건' ? 'bg-blue-100 text-blue-800' :
-                        pattern.type === '조끼' ? 'bg-purple-100 text-purple-800' : 'bg-gray-100 text-gray-800'
-                      }`}>{pattern.type}</span>
+                    {/* 이름 수정 */}
+                    <td className="p-2 border-r border-gray-200">
+                      <input type="text" value={pattern.name} onChange={(e) => handleCellChange(pattern.id, 'name', e.target.value)} className="w-full bg-transparent px-3 py-1 font-semibold text-blue-600 focus:bg-white focus:outline-blue-400 rounded" />
                     </td>
-                    <td className="p-3 text-gray-500 border-r border-gray-200">{pattern.amount}</td>
-                    <td className="p-3 text-gray-600 border-r border-gray-200">{pattern.yarn}</td>
-                    <td className="p-3 text-gray-600 border-r border-gray-200">{pattern.yarnComponent}</td>
-                    <td className="p-3 text-gray-500 border-r border-gray-200 text-xs">{pattern.note}</td>
-                    <td className="p-3 pl-4">
-                      {pattern.imageUrl ? <img src={pattern.imageUrl} alt="preview" className="w-8 h-8 object-cover rounded border border-gray-300" /> : <span className="text-gray-300 text-xs">-</span>}
+                    {/* 게이지 수정 */}
+                    <td className="p-2 border-r border-gray-200">
+                      <input type="text" value={pattern.gauge} onChange={(e) => handleCellChange(pattern.id, 'gauge', e.target.value)} className="w-full bg-transparent px-2 py-1 text-gray-600 focus:bg-white focus:outline-blue-400 rounded" />
+                    </td>
+                    {/* 종류 수정 */}
+                    <td className="p-2 border-r border-gray-200">
+                      <input type="text" value={pattern.type} onChange={(e) => handleCellChange(pattern.id, 'type', e.target.value)} className="w-full bg-transparent px-2 py-1 text-gray-600 focus:bg-white focus:outline-blue-400 text-xs font-medium rounded" />
+                    </td>
+                    {/* 원작실 수정 */}
+                    <td className="p-2 border-r border-gray-200">
+                      <input type="text" value={pattern.yarn} onChange={(e) => handleCellChange(pattern.id, 'yarn', e.target.value)} className="w-full bg-transparent px-2 py-1 text-gray-600 focus:bg-white focus:outline-blue-400 rounded" />
+                    </td>
+                    {/* 성분 수정 */}
+                    <td className="p-2 border-r border-gray-200">
+                      <input type="text" value={pattern.yarnComponent} onChange={(e) => handleCellChange(pattern.id, 'yarnComponent', e.target.value)} className="w-full bg-transparent px-2 py-1 text-gray-600 focus:bg-white focus:outline-blue-400 rounded" />
+                    </td>
+                    {/* 비고 수정 */}
+                    <td className="p-2 border-r border-gray-200">
+                      <input type="text" value={pattern.note} onChange={(e) => handleCellChange(pattern.id, 'note', e.target.value)} className="w-full bg-transparent px-2 py-1 text-gray-500 text-xs focus:bg-white focus:outline-blue-400 rounded" />
+                    </td>
+                    {/* 착샷 이미지 미리보기 */}
+                    <td className="p-2 border-r border-gray-200 text-center flex justify-center items-center">
+                      {pattern.imageUrl ? (
+                        <img src={pattern.imageUrl} alt="preview" className="w-10 h-10 object-cover rounded border border-gray-300 shadow-sm" />
+                      ) : (
+                        <span className="text-gray-300 text-xs">-</span>
+                      )}
+                    </td>
+                    {/* 행 삭제 버튼 */}
+                    <td className="p-2 text-center">
+                      <button onClick={() => deleteRow(pattern.id)} className="text-gray-400 hover:text-red-500 p-1 transition-colors">
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -133,7 +179,7 @@ export default function Home() {
             </table>
           </div>
           <div className="p-3 bg-gray-50/50 border-t border-gray-200">
-            <button onClick={() => setPatterns(prev => [...prev, { id: Date.now(), name: '새 도안 항목', gauge: '', type: '스웨터', amount: '', yarn: '', yarnComponent: '', note: '' }])} className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-800 font-medium transition-colors">
+            <button onClick={() => setPatterns(prev => [{ id: Date.now(), name: '새 도안 항목', gauge: '', type: '스웨터', yarn: '', yarnComponent: '', note: '' }, ...prev])} className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-800 font-medium transition-colors">
               <Plus className="w-3.5 h-3.5" /> 새로 만들기
             </button>
           </div>
