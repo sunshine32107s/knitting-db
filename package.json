@@ -1,0 +1,18 @@
+{
+  "name": "knitting-db",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "@google/genai": "^0.1.1",
+    "lucide-react": "^0.300.0",
+    "next": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "tailwindcss": "latest"
+  }
+}
