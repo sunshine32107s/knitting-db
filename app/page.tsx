@@ -57,7 +57,7 @@ export default function Home() {
       setPatterns((prev) => [newPattern, ...prev]);
     } catch (error) {
       alert('도안을 읽는 중 오류가 발생했습니다. 다시 시도해 주세요.');
-    } finaly {
+    } finally {
       setLoading(false);
     }
   };
