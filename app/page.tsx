@@ -96,14 +96,12 @@ export default function Home() {
 
       <div className="max-w-7xl mx-auto space-y-6 custom-cute-font text-base">
         
-        {/* 대제목 영역 */}
-       <div className="flex items-center gap-3">
-  <h1 className="text-3xl font-bold text-sky-900 tracking-tight">고래고래 도안 저장소</h1>
-  {whale_m.gif)}
-  <img src="/whale_m.gif" alt="title whale" className="w-10 h-10 object-contain" />
-</div>
-          <p className="text-sm text-sky-600/80 mt-1">도안을 업로드하면 AI가 정리해 줍니다. 직접 수정도 가능해요!</p>
+        {/* 대제목 영역 - 깔끔하게 오류 코드만 청소 완료 */}
+        <div className="flex items-center gap-3">
+          <h1 className="text-3xl font-bold text-sky-900 tracking-tight">고래고래 도안 저장소</h1>
+          <img src="/whale_m.gif" alt="title whale" className="w-10 h-10 object-contain" />
         </div>
+        <p className="text-sm text-sky-600/80 mt-1">도안을 업로드하면 AI가 정리해 줍니다. 직접 수정도 가능해요!</p>
 
         {/* 슬림해진 업로드 창 */}
         <div 
@@ -117,7 +115,7 @@ export default function Home() {
         >
           <input id="fileInput" type="file" accept="image/*,application/pdf" className="hidden" onChange={(e) => { if(e.target.files?.[0]) handleFileUpload(e.target.files[0]); }} />
           
-          {/* 꼬였던 이미지 태그 문법 완벽 수정 */}
+          {/* 로딩 창 고래 애니메이션 구조 유지 */}
           {loading ? (
             <div className="flex flex-row items-center justify-center gap-3 py-1">
               <img 
