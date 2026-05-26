@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Upload, Loader2, Plus, Trash2 } from 'lucide-react';
+import { Upload, Plus, Trash2 } from 'lucide-react';
 
 interface Pattern {
   id: number;
@@ -99,7 +99,7 @@ export default function Home() {
         {/* 대제목 영역 */}
         <div>
           <h1 className="text-3xl font-bold text-sky-900 tracking-tight">도안 저장소</h1>
-          <p className="text-sm text-sky-600/80 mt-1">도안을 업로드하면 AI가 정리해 줍니다. 직접 수정도 가능해요🐳!</p>
+          <p className="text-sm text-sky-600/80 mt-1">도안을 업로드하면 AI가 정리해 줍니다. 직접 수정도 가능해요!</p>
         </div>
 
         {/* 슬림해진 업로드 창 */}
@@ -113,10 +113,17 @@ export default function Home() {
           onClick={() => document.getElementById('fileInput')?.click()}
         >
           <input id="fileInput" type="file" accept="image/*,application/pdf" className="hidden" onChange={(e) => { if(e.target.files?.[0]) handleFileUpload(e.target.files[0]); }} />
+          
+          {/* [변경] 보내주신 플래티콘 고래 애니메이션 직접 주소 반영 */}
           {loading ? (
-            <div className="flex items-center justify-center gap-2 py-1">
-              <Loader2 className="w-5 h-5 text-sky-500 animate-spin" />
-              <p className="text-sm font-medium text-sky-800">AI가 도안을 열심히 읽고 있어요...</p>
+            <div className="flex flex-col items-center justify-center gap-1">
+              <img 
+                src="https://cdn-icons-png.flaticon.com/512/17510/17510100.png" 
+                alt="whale loading" 
+                className="w-14 h-14 object-contain animate-bounce"
+                style={{ animationDuration: '2s' }}
+              />
+              <p className="text-sm font-medium text-sky-800">고래가 도안을 열심히 읽고 있어요...</p>
             </div>
           ) : (
             <div className="flex items-center justify-center gap-2 py-1">
@@ -145,35 +152,24 @@ export default function Home() {
               <tbody>
                 {patterns.map((pattern) => (
                   <tr key={pattern.id} className="border-b border-sky-50 hover:bg-sky-50/30 transition-colors text-base">
-                    
-                    {/* 이름: 선명한 블루, 볼드 유지 */}
                     <td className="p-2 border-r border-sky-100 text-center">
                       <input type="text" value={pattern.name} onChange={(e) => handleCellChange(pattern.id, 'name', e.target.value)} className="w-full bg-transparent px-2 py-1 font-bold text-blue-600 text-center focus:bg-white focus:outline-sky-200 rounded" />
                     </td>
-                    
-                    {/* 세부항목: 직전에 가장 마음에 들어하셨던 선명한 진한 색상(text-gray-900)으로 완벽 롤백 */}
                     <td className="p-2 border-r border-sky-100 text-center">
                       <input type="text" value={pattern.gauge} onChange={(e) => handleCellChange(pattern.id, 'gauge', e.target.value)} className="w-full bg-transparent px-2 py-1 font-medium text-gray-900 text-center focus:bg-white focus:outline-sky-200 rounded" />
                     </td>
-
                     <td className="p-2 border-r border-sky-100 text-center">
                       <input type="text" value={pattern.type} onChange={(e) => handleCellChange(pattern.id, 'type', e.target.value)} className="w-full bg-transparent px-2 py-1 font-medium text-gray-900 text-center focus:bg-white focus:outline-sky-200 rounded" />
                     </td>
-
                     <td className="p-2 border-r border-sky-100 text-center">
                       <input type="text" value={pattern.yarn} onChange={(e) => handleCellChange(pattern.id, 'yarn', e.target.value)} className="w-full bg-transparent px-2 py-1 font-medium text-gray-900 text-center focus:bg-white focus:outline-sky-200 rounded" />
                     </td>
-
                     <td className="p-2 border-r border-sky-100 text-center">
                       <input type="text" value={pattern.yarnComponent} onChange={(e) => handleCellChange(pattern.id, 'yarnComponent', e.target.value)} className="w-full bg-transparent px-2 py-1 font-medium text-gray-900 text-center focus:bg-white focus:outline-sky-200 rounded" />
                     </td>
-
-                    {/* 특징: 부연설명도 선명함을 주되 조화를 위해 살짝만 다듬은 text-gray-900 계열 유지 */}
                     <td className="p-2 border-r border-sky-100 text-center">
                       <input type="text" value={pattern.note} onChange={(e) => handleCellChange(pattern.id, 'note', e.target.value)} className="w-full bg-transparent px-2 py-1 font-medium text-gray-900 text-center focus:bg-white focus:outline-sky-200 rounded" />
                     </td>
-                    
-                    {/* 착샷 */}
                     <td className="p-2 border-r border-sky-100 text-center">
                       <div className="flex justify-center items-center">
                         {pattern.imageUrl ? (
@@ -183,7 +179,6 @@ export default function Home() {
                         )}
                       </div>
                     </td>
-                    {/* 삭제 */}
                     <td className="p-2 text-center">
                       <button onClick={() => deleteRow(pattern.id)} className="text-gray-400 hover:text-red-400 p-1 transition-colors">
                         <Trash2 className="w-4 h-4" />
