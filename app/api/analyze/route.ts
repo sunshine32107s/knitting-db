@@ -20,9 +20,8 @@ export async function POST(request: Request) {
       다음 구조에 맞는 정보를 정확하게 추출해 주세요. 도안에 명시되지 않은 정보는 빈 문자열로 두세요.
       
       - 이름: 작품의 이름 또는 도안명
-      - 게이지: 게이지 정보 (예: '11.5*17', '18*24' 등 수치 형태 우선)
+      - 게이지: 게이지 정보. 단, '10cm', '코', '단' 같은 글자는 일절 제외하고 오직 숫자와 곱하기 기호만 사용하여 기재하세요. (예: '11.5*17', '18*24' 형태로만 추출)
       - 종류: 스웨터, 가디건, 조끼, 대바늘 소품 등 카테고리 분류
-      - 소요량: 필요한 실의 양 (m 또는 볼 단위 숫자만 추출)
       - 원작실: 도안에 사용된 원작 실 이름
       - 원작실성분: 실의 성분 (울, 캐시미어 등)
       - 비고: 언어 정보(영어, 한글) 및 특이사항 (예: '영어 / 망토', '영어 / 소매')
@@ -47,7 +46,6 @@ export async function POST(request: Request) {
             name: { type: Type.STRING, description: "작품명" },
             gauge: { type: Type.STRING, description: "게이지 (예: 12*17)" },
             type: { type: Type.STRING, description: "종류 (스웨터, 가디건, 조끼, 대바늘 소품 등)" },
-            amount: { type: Type.STRING, description: "소요량" },
             yarn: { type: Type.STRING, description: "원작 실" },
             yarnComponent: { type: Type.STRING, description: "원작 실 성분" },
             note: { type: Type.STRING, description: "비고 (언어 및 특징)" },
