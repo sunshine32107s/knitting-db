@@ -73,7 +73,7 @@ export default function Home() {
     }
   };
 
-  const handleCellChange = (id: number, field: keyof Pattern, value: string) => {
+  const handleCellChange = (id: number, field: key5of Pattern, value: string) => {
     setPatterns((prev) =>
       prev.map((item) => (item.id === id ? { ...item, [field]: value } : item))
     );
@@ -114,16 +114,19 @@ export default function Home() {
         >
           <input id="fileInput" type="file" accept="image/*,application/pdf" className="hidden" onChange={(e) => { if(e.target.files?.[0]) handleFileUpload(e.target.files[0]); }} />
           
-          {/* [변경] 로딩 시 고래 애니메이션과 문구를 포함하는 div에 flex-row 및 items-center 클래스 추가 */}
+          {/* 플래티콘 진짜 원본 움짤 주소 연동 및 세로 정중앙 정렬 */}
           {loading ? (
-            <div className="flex flex-row items-center justify-center gap-3.5 py-1">
+            <div className="flex flex-row items-center justify-center gap-3 py-1">
               <img 
-                /* [변경] 프로젝트 내부 이미지 경로 (/images/whale_loading.gif) 사용 */
-                src="/images/whale_loading.gif" 
+                src="https://v1.flaticon.com/free-animated-icon/whale_17510100" 
                 alt="whale loading" 
-                className="w-12 h-12 object-contain"
+                className="w-10 h-10 object-contain"
+                onError={(e) => {
+                  // 혹시 위 주소가 차단될 경우를 대비한 안전 장치용 대체 주소
+                  (e.target as HTMLImageElement).src = "https://cdn-icons-png.flaticon.com/512/17510/17510100.png";
+                }}
               />
-              <p className="text-sm font-medium text-sky-800">고래가 도안을 열심히 읽고 있어요...</p>
+              <p className="text-sm font-medium text-sky-800">고래가 도안을 열심히 읽고 있어요!</p>
             </div>
           ) : (
             <div className="flex items-center justify-center gap-2 py-1">
@@ -168,7 +171,7 @@ export default function Home() {
                       <input type="text" value={pattern.yarnComponent} onChange={(e) => handleCellChange(pattern.id, 'yarnComponent', e.target.value)} className="w-full bg-transparent px-2 py-1 font-medium text-gray-900 text-center focus:bg-white focus:outline-sky-200 rounded" />
                     </td>
                     <td className="p-2 border-r border-sky-100 text-center">
-                      <input type="text" value={pattern.note} onChange={(e) => handleCellChange(pattern.id, 'note', e.target.value)} className="w-full bg-transparent px-2 py-1 font-medium text-gray-800 text-center focus:bg-white focus:outline-sky-200 rounded" />
+                      <input type="text" value={pattern.note} onChange={(e) => handleCellChange(pattern.id, 'note', e.target.value)} className="w-full bg-transparent px-2 py-1 font-medium text-gray-900 text-center focus:bg-white focus:outline-sky-200 rounded" />
                     </td>
                     <td className="p-2 border-r border-sky-100 text-center">
                       <div className="flex justify-center items-center">
