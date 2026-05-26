@@ -73,7 +73,7 @@ export default function Home() {
     }
   };
 
-  const handleCellChange = (id: number, field: key5of Pattern, value: string) => {
+  const handleCellChange = (id: number, field: keyof Pattern, value: string) => {
     setPatterns((prev) =>
       prev.map((item) => (item.id === id ? { ...item, [field]: value } : item))
     );
