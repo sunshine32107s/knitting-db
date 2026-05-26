@@ -131,7 +131,6 @@ export default function Home() {
           <div className="overflow-x-auto">
             <table className="w-full border-collapse table-fixed min-w-[900px]">
               <thead>
-                {/* 제목행 짙은 푸른색 계열(text-sky-900) 유지 및 가운데 정렬 */}
                 <tr className="bg-sky-50/70 border-b border-sky-100 text-sky-950 font-bold text-center text-base">
                   <th className="p-3 border-r border-sky-100 w-[22%]">이름</th>
                   <th className="p-3 border-r border-sky-100 w-[12%]">게이지</th>
@@ -147,26 +146,34 @@ export default function Home() {
                 {patterns.map((pattern) => (
                   <tr key={pattern.id} className="border-b border-sky-50 hover:bg-sky-50/30 transition-colors text-base">
                     
-                    {/* 이름: 원래의 예쁜 푸른색 계열(text-blue-600)과 두께감을 뚜렷하게 복원 */}
-                    <td className="p-2 border-r border-sky-100 whitespace-pre-wrap break-all text-center">
-                      <textarea rows={1} value={pattern.name} onChange={(e) => handleCellChange(pattern.id, 'name', e.target.value)} className="w-full bg-transparent px-2 py-1 font-bold text-blue-600 text-center focus:bg-white focus:outline-sky-200 resize-none rounded overflow-hidden" />
+                    {/* 이름: 강조되어야 하므로 기존의 선명한 볼드 블루 유지 */}
+                    <td className="p-2 border-r border-sky-100 text-center">
+                      <input type="text" value={pattern.name} onChange={(e) => handleCellChange(pattern.id, 'name', e.target.value)} className="w-full bg-transparent px-2 py-1 font-bold text-blue-600 text-center focus:bg-white focus:outline-sky-200 rounded" />
                     </td>
                     
-                    {/* 게이지 및 기타 세부 항목: 흐릿함을 없애고 선명하게 인지되도록 굵은 font-medium 및 또렷한 차콜블랙 설정 */}
-                    <td className="p-2 border-r border-sky-100 whitespace-pre-wrap break-all text-center">
-                      <textarea rows={1} value={pattern.gauge} onChange={(e) => handleCellChange(pattern.id, 'gauge', e.target.value)} className="w-full bg-transparent px-2 py-1 font-semibold text-gray-900 text-center focus:bg-white focus:outline-sky-200 resize-none rounded overflow-hidden" />
+                    {/* 게이지: font-medium(일반 두께)으로 완화하고 색상을 text-gray-700으로 부드럽게 조정 */}
+                    <td className="p-2 border-r border-sky-100 text-center">
+                      <input type="text" value={pattern.gauge} onChange={(e) => handleCellChange(pattern.id, 'gauge', e.target.value)} className="w-full bg-transparent px-2 py-1 font-medium text-gray-700 text-center focus:bg-white focus:outline-sky-200 rounded" />
                     </td>
-                    <td className="p-2 border-r border-sky-100 whitespace-pre-wrap break-all text-center">
-                      <textarea rows={1} value={pattern.type} onChange={(e) => handleCellChange(pattern.id, 'type', e.target.value)} className="w-full bg-transparent px-2 py-1 font-semibold text-gray-900 text-center focus:bg-white focus:outline-sky-200 resize-none rounded overflow-hidden" />
+
+                    {/* 종류 */}
+                    <td className="p-2 border-r border-sky-100 text-center">
+                      <input type="text" value={pattern.type} onChange={(e) => handleCellChange(pattern.id, 'type', e.target.value)} className="w-full bg-transparent px-2 py-1 font-medium text-gray-700 text-center focus:bg-white focus:outline-sky-200 rounded" />
                     </td>
-                    <td className="p-2 border-r border-sky-100 whitespace-pre-wrap break-all text-center">
-                      <textarea rows={1} value={pattern.yarn} onChange={(e) => handleCellChange(pattern.id, 'yarn', e.target.value)} className="w-full bg-transparent px-2 py-1 font-semibold text-gray-900 text-center focus:bg-white focus:outline-sky-200 resize-none rounded overflow-hidden" />
+
+                    {/* 원작실 */}
+                    <td className="p-2 border-r border-sky-100 text-center">
+                      <input type="text" value={pattern.yarn} onChange={(e) => handleCellChange(pattern.id, 'yarn', e.target.value)} className="w-full bg-transparent px-2 py-1 font-medium text-gray-700 text-center focus:bg-white focus:outline-sky-200 rounded" />
                     </td>
-                    <td className="p-2 border-r border-sky-100 whitespace-pre-wrap break-all text-center">
-                      <textarea rows={1} value={pattern.yarnComponent} onChange={(e) => handleCellChange(pattern.id, 'yarnComponent', e.target.value)} className="w-full bg-transparent px-2 py-1 font-semibold text-gray-900 text-center focus:bg-white focus:outline-sky-200 resize-none rounded overflow-hidden" />
+
+                    {/* 성분 */}
+                    <td className="p-2 border-r border-sky-100 text-center">
+                      <input type="text" value={pattern.yarnComponent} onChange={(e) => handleCellChange(pattern.id, 'yarnComponent', e.target.value)} className="w-full bg-transparent px-2 py-1 font-medium text-gray-700 text-center focus:bg-white focus:outline-sky-200 rounded" />
                     </td>
-                    <td className="p-2 border-r border-sky-100 whitespace-pre-wrap break-all text-center">
-                      <textarea rows={1} value={pattern.note} onChange={(e) => handleCellChange(pattern.id, 'note', e.target.value)} className="w-full bg-transparent px-2 py-1 font-semibold text-gray-800 text-center focus:bg-white focus:outline-sky-200 resize-none rounded overflow-hidden" />
+
+                    {/* 특징: 부연설명이므로 약간 더 은은한 text-gray-600 적용 */}
+                    <td className="p-2 border-r border-sky-100 text-center">
+                      <input type="text" value={pattern.note} onChange={(e) => handleCellChange(pattern.id, 'note', e.target.value)} className="w-full bg-transparent px-2 py-1 font-medium text-gray-600 text-center focus:bg-white focus:outline-sky-200 rounded" />
                     </td>
                     
                     {/* 착샷 */}
