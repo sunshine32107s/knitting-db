@@ -98,7 +98,7 @@ export default function Home() {
         
         {/* 대제목 영역 */}
         <div>
-          <h1 className="text-3xl font-bold text-sky-900 tracking-tight">도안 저장소</h1>
+          <h1 className="text-3xl font-bold text-sky-900 tracking-tight">고래고래 도안 저장소</h1>
           <p className="text-sm text-sky-600/80 mt-1">도안을 업로드하면 AI가 정리해 줍니다. 직접 수정도 가능해요!</p>
         </div>
 
@@ -114,14 +114,14 @@ export default function Home() {
         >
           <input id="fileInput" type="file" accept="image/*,application/pdf" className="hidden" onChange={(e) => { if(e.target.files?.[0]) handleFileUpload(e.target.files[0]); }} />
           
-          {/* [변경] 보내주신 플래티콘 고래 애니메이션 직접 주소 반영 */}
+          {/* [변경] 로딩 시 고래 애니메이션과 문구를 포함하는 div에 flex-row 및 items-center 클래스 추가 */}
           {loading ? (
-            <div className="flex flex-col items-center justify-center gap-1">
+            <div className="flex flex-row items-center justify-center gap-3.5 py-1">
               <img 
-                src="https://cdn-icons-png.flaticon.com/512/17510/17510100.png" 
+                /* [변경] 프로젝트 내부 이미지 경로 (/images/whale_loading.gif) 사용 */
+                src="/images/whale_loading.gif" 
                 alt="whale loading" 
-                className="w-14 h-14 object-contain animate-bounce"
-                style={{ animationDuration: '2s' }}
+                className="w-12 h-12 object-contain"
               />
               <p className="text-sm font-medium text-sky-800">고래가 도안을 열심히 읽고 있어요...</p>
             </div>
@@ -168,7 +168,7 @@ export default function Home() {
                       <input type="text" value={pattern.yarnComponent} onChange={(e) => handleCellChange(pattern.id, 'yarnComponent', e.target.value)} className="w-full bg-transparent px-2 py-1 font-medium text-gray-900 text-center focus:bg-white focus:outline-sky-200 rounded" />
                     </td>
                     <td className="p-2 border-r border-sky-100 text-center">
-                      <input type="text" value={pattern.note} onChange={(e) => handleCellChange(pattern.id, 'note', e.target.value)} className="w-full bg-transparent px-2 py-1 font-medium text-gray-900 text-center focus:bg-white focus:outline-sky-200 rounded" />
+                      <input type="text" value={pattern.note} onChange={(e) => handleCellChange(pattern.id, 'note', e.target.value)} className="w-full bg-transparent px-2 py-1 font-medium text-gray-800 text-center focus:bg-white focus:outline-sky-200 rounded" />
                     </td>
                     <td className="p-2 border-r border-sky-100 text-center">
                       <div className="flex justify-center items-center">
