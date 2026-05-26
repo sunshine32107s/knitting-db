@@ -97,11 +97,10 @@ export default function Home() {
       <div className="max-w-7xl mx-auto space-y-6 custom-cute-font text-base">
         
         {/* 대제목 영역 */}
-        <div>
-          <h1 className="text-3xl font-bold text-sky-900 tracking-tight">고래고래 도안 저장소</h1>
-          <div className="flex items-center gap-3">
+       <div className="flex items-center gap-3">
   <h1 className="text-3xl font-bold text-sky-900 tracking-tight">고래고래 도안 저장소</h1>
-  <img src="/whale_m.gif" alt="whale_m" className="w-10 h-10 object-contain" />
+  {whale_m.gif)}
+  <img src="/whale_m.gif" alt="title whale" className="w-10 h-10 object-contain" />
 </div>
           <p className="text-sm text-sky-600/80 mt-1">도안을 업로드하면 AI가 정리해 줍니다. 직접 수정도 가능해요!</p>
         </div>
