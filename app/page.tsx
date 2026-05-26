@@ -114,15 +114,14 @@ export default function Home() {
         >
           <input id="fileInput" type="file" accept="image/*,application/pdf" className="hidden" onChange={(e) => { if(e.target.files?.[0]) handleFileUpload(e.target.files[0]); }} />
           
-          {/* 플래티콘 진짜 원본 움짤 주소 연동 및 세로 정중앙 정렬 */}
+          {/* 꼬였던 이미지 태그 문법 완벽 수정 */}
           {loading ? (
             <div className="flex flex-row items-center justify-center gap-3 py-1">
               <img 
-  src="/whale.gif" 
-  alt="whale loading" 
-  className="w-12 h-12 object-contain"
-/> {
-                  // 혹시 위 주소가 차단될 경우를 대비한 안전 장치용 대체 주소
+                src="/whale.gif" 
+                alt="whale loading" 
+                className="w-12 h-12 object-contain"
+                onError={(e) => {
                   (e.target as HTMLImageElement).src = "https://cdn-icons-png.flaticon.com/512/17510/17510100.png";
                 }}
               />
