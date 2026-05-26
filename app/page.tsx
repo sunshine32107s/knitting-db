@@ -153,4 +153,53 @@ export default function Home() {
                     </td>
                     {/* 게이지 */}
                     <td className="p-2 border-r border-sky-100 whitespace-pre-wrap break-all">
-                      <textarea rows={1} value={pattern.gauge} onChange={(e) => handleCellChange(pattern.id, 'gauge', e.target.value)} className="w-full bg-transparent px
+                      <textarea rows={1} value={pattern.gauge} onChange={(e) => handleCellChange(pattern.id, 'gauge', e.target.value)} className="w-full bg-transparent px-2 py-1 text-gray-700 focus:bg-white focus:outline-sky-200 text-center resize-none rounded overflow-hidden" />
+                    </td>
+                    {/* 종류 */}
+                    <td className="p-2 border-r border-sky-100 whitespace-pre-wrap break-all">
+                      <textarea rows={1} value={pattern.type} onChange={(e) => handleCellChange(pattern.id, 'type', e.target.value)} className="w-full bg-transparent px-2 py-1 text-gray-700 focus:bg-white focus:outline-sky-200 text-center resize-none rounded overflow-hidden" />
+                    </td>
+                    {/* 원작실 */}
+                    <td className="p-2 border-r border-sky-100 whitespace-pre-wrap break-all">
+                      <textarea rows={1} value={pattern.yarn} onChange={(e) => handleCellChange(pattern.id, 'yarn', e.target.value)} className="w-full bg-transparent px-2 py-1 text-gray-700 focus:bg-white focus:outline-sky-200 resize-none rounded overflow-hidden" />
+                    </td>
+                    {/* 성분 */}
+                    <td className="p-2 border-r border-sky-100 whitespace-pre-wrap break-all">
+                      <textarea rows={1} value={pattern.yarnComponent} onChange={(e) => handleCellChange(pattern.id, 'yarnComponent', e.target.value)} className="w-full bg-transparent px-2 py-1 text-gray-700 focus:bg-white focus:outline-sky-200 resize-none rounded overflow-hidden" />
+                    </td>
+                    {/* 비고 */}
+                    <td className="p-2 border-r border-sky-100 whitespace-pre-wrap break-all">
+                      <textarea rows={1} value={pattern.note} onChange={(e) => handleCellChange(pattern.id, 'note', e.target.value)} className="w-full bg-transparent px-2 py-1 text-gray-600 text-sm focus:bg-white focus:outline-sky-200 resize-none rounded overflow-hidden" />
+                    </td>
+                    
+                    {/* 착샷 */}
+                    <td className="p-2 border-r border-sky-100 text-center">
+                      <div className="flex justify-center items-center">
+                        {pattern.imageUrl ? (
+                          <img src={pattern.imageUrl} alt="preview" className="w-10 h-10 object-cover rounded-lg border border-sky-200 shadow-sm" />
+                        ) : (
+                          <span className="text-gray-300 text-sm">-</span>
+                        )}
+                      </div>
+                    </td>
+                    {/* 삭제 */}
+                    <td className="p-2 text-center">
+                      <button onClick={() => deleteRow(pattern.id)} className="text-gray-400 hover:text-red-400 p-1 transition-colors">
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div className="p-3 bg-sky-50/20 border-t border-sky-50">
+            <button onClick={() => setPatterns(prev => [{ id: Date.now(), name: '새 도안 항목', gauge: '', type: '', yarn: '', yarnComponent: '', note: '' }, ...prev])} className="flex items-center gap-1.5 text-sm text-sky-600 hover:text-sky-800 font-semibold transition-colors">
+              <Plus className="w-3.5 h-3.5" /> 새로 만들기
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
