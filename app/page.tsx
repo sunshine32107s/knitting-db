@@ -251,7 +251,7 @@ export default function Home() {
           <div className="overflow-x-auto w-full">
             <table className="w-full border-collapse table-fixed min-w-[850px]">
               <thead>
-                <tr className="bg-sky-50/70 border-b border-sky-100 text-sky-950 font-semibold text-center text-sm select-none">
+                <tr className="bg-sky-50/70 border-b border-sky-100 text-sky-950 font-bold text-center text-sm select-none">
                   <th className="p-1.5 border-r border-sky-100 w-[18%] cursor-pointer hover:bg-sky-100/50 transition-colors" onClick={() => handleSort('name')}>
                     <div className="flex items-center justify-center gap-1">이름 {renderSortIcon('name')}</div>
                   </th>
@@ -298,27 +298,27 @@ export default function Home() {
                       </td>
                       <td className="p-1 border-r border-sky-100">
                         <div className="flex items-center justify-center min-h-[34px] w-full">
-                          <textarea rows={1} value={pattern.gauge} onChange={(e) => handleCellChange(pattern.id, 'gauge', e.target.value)} className="w-full bg-transparent px-1.5 py-1 font-bold text-gray-950 text-center focus:bg-white focus:outline-sky-200 rounded resize-none overflow-hidden text-sm" onInput={(e) => { const t = e.target as HTMLTextAreaElement; t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; }} />
+                          <textarea rows={1} value={pattern.gauge} onChange={(e) => handleCellChange(pattern.id, 'gauge', e.target.value)} className="w-full bg-transparent px-1.5 py-1 font-semibold text-gray-950 text-center focus:bg-white focus:outline-sky-200 rounded resize-none overflow-hidden text-sm" onInput={(e) => { const t = e.target as HTMLTextAreaElement; t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; }} />
                         </div>
                       </td>
                       <td className="p-1 border-r border-sky-100">
                         <div className="flex items-center justify-center min-h-[34px] w-full">
-                          <textarea rows={1} value={pattern.type} onChange={(e) => handleCellChange(pattern.id, 'type', e.target.value)} className="w-full bg-transparent px-1.5 py-1 font-bold text-gray-950 text-center focus:bg-white focus:outline-sky-200 rounded resize-none overflow-hidden text-sm" onInput={(e) => { const t = e.target as HTMLTextAreaElement; t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; }} />
+                          <textarea rows={1} value={pattern.type} onChange={(e) => handleCellChange(pattern.id, 'type', e.target.value)} className="w-full bg-transparent px-1.5 py-1 font-semibold text-gray-950 text-center focus:bg-white focus:outline-sky-200 rounded resize-none overflow-hidden text-sm" onInput={(e) => { const t = e.target as HTMLTextAreaElement; t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; }} />
                         </div>
                       </td>
                       <td className="p-1 border-r border-sky-100">
                         <div className="flex items-center justify-center min-h-[34px] w-full">
-                          <textarea rows={1} value={pattern.yarn} onChange={(e) => handleCellChange(pattern.id, 'yarn', e.target.value)} className="w-full bg-transparent px-1.5 py-1 font-bold text-gray-950 text-center focus:bg-white focus:outline-sky-200 rounded resize-none overflow-hidden text-sm" onInput={(e) => { const t = e.target as HTMLTextAreaElement; t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; }} />
+                          <textarea rows={1} value={pattern.yarn} onChange={(e) => handleCellChange(pattern.id, 'yarn', e.target.value)} className="w-full bg-transparent px-1.5 py-1 font-semibold text-gray-950 text-center focus:bg-white focus:outline-sky-200 rounded resize-none overflow-hidden text-sm" onInput={(e) => { const t = e.target as HTMLTextAreaElement; t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; }} />
                         </div>
                       </td>
                       <td className="p-1 border-r border-sky-100">
                         <div className="flex items-center justify-center min-h-[34px] w-full">
-                          <textarea rows={1} value={pattern.yarnComponent} onChange={(e) => handleCellChange(pattern.id, 'yarnComponent', e.target.value)} className="w-full bg-transparent px-1.5 py-1 font-bold text-gray-950 text-center focus:bg-white focus:outline-sky-200 rounded resize-none overflow-hidden text-sm" onInput={(e) => { const t = e.target as HTMLTextAreaElement; t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; }} />
+                          <textarea rows={1} value={pattern.yarnComponent} onChange={(e) => handleCellChange(pattern.id, 'yarnComponent', e.target.value)} className="w-full bg-transparent px-1.5 py-1 font-semibold text-gray-950 text-center focus:bg-white focus:outline-sky-200 rounded resize-none overflow-hidden text-sm" onInput={(e) => { const t = e.target as HTMLTextAreaElement; t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; }} />
                         </div>
                       </td>
                       <td className="p-1 border-r border-sky-100">
                         <div className="flex items-center justify-center min-h-[34px] w-full">
-                          <textarea rows={1} value={pattern.note} onChange={(e) => handleCellChange(pattern.id, 'note', e.target.value)} className="w-full bg-transparent px-1.5 py-1 font-bold text-gray-950 text-center focus:bg-white focus:outline-sky-200 rounded resize-none overflow-hidden text-sm" onInput={(e) => { const t = e.target as HTMLTextAreaElement; t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; }} />
+                          <textarea rows={1} value={pattern.note} onChange={(e) => handleCellChange(pattern.id, 'note', e.target.value)} className="w-full bg-transparent px-1.5 py-1 font-semibold text-gray-950 text-center focus:bg-white focus:outline-sky-200 rounded resize-none overflow-hidden text-sm" onInput={(e) => { const t = e.target as HTMLTextAreaElement; t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; }} />
                         </div>
                       </td>
                       <td className="p-1 border-r border-sky-100 text-center">
