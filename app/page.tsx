@@ -32,7 +32,6 @@ export default function Home() {
     fetchPatterns();
   }, []);
 
-  // 📐 모든 입력창의 높이를 글자 양에 맞게 재계산해 주는 핵심 함수
   const adjustTextareasHeight = () => {
     if (tableBodyRef.current) {
       const textareas = tableBodyRef.current.querySelectorAll('textarea');
@@ -43,14 +42,12 @@ export default function Home() {
     }
   };
 
-  // 🔄 1. 데이터 로드 / 정렬 시 높이 조절
   useEffect(() => {
     if (!dataLoading && patterns.length > 0) {
       setTimeout(adjustTextareasHeight, 50);
     }
   }, [patterns, sortField, sortOrder, dataLoading]);
 
-  // 📱 2. [신규 추가] 화면 크기가 늘어나거나 줄어들 때 실시간으로 높이 재계산하기
   useEffect(() => {
     window.addEventListener('resize', adjustTextareasHeight);
     return () => {
@@ -139,7 +136,6 @@ export default function Home() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id, field, value }),
       });
-      // 내가 타이핑해서 줄바꿈이 일어날 때도 즉시 높이 맞춤
       setTimeout(adjustTextareasHeight, 10);
     } catch (error) {
       console.error('업데이트 실패:', error);
@@ -217,13 +213,16 @@ export default function Home() {
       <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet" />
       <style>{`.custom-cute-font { font-family: 'Gowun Dodum', sans-serif; }`}</style>
 
-      <div className="max-w-7xl mx-auto space-y-6 custom-cute-font text-base">
+      {/* 📐 전체 폰트 기준을 text-base에서 text-sm으로 변경하여 일관성을 맞췄습니다. */}
+      <div className="max-w-7xl mx-auto space-y-6 custom-cute-font text-sm">
         
-        <div className="flex items-center gap-1.5">
-          <h1 className="text-3xl font-bold text-sky-900 tracking-tight">고래고래 도안 분석소</h1>
-          <img src="/whale_m.gif" alt="title whale" className="w-16 h-16 object-contain" />
+        <div className="space-y-1">
+          <div className="flex items-center gap-1.5">
+            <h1 className="text-3xl font-bold text-sky-900 tracking-tight">고래고래 도안 분석소</h1>
+            <img src="/whale_m.gif" alt="title whale" className="w-16 h-16 object-contain" />
+          </div>
+          <p className="text-sm text-sky-600/80">도안을 업로드하면 AI가 꼼꼼하게 분석해 줍니다. 헤더를 클릭해 정렬해 보세요!</p>
         </div>
-        <p className="text-sm text-sky-600/80 mt-1">도안을 업로드하면 AI가 꼼꼼하게 분석해 줍니다. 헤더를 클릭해 정렬해 보세요!</p>
 
         <div 
           onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
@@ -253,7 +252,8 @@ export default function Home() {
           <div className="overflow-x-auto w-full">
             <table className="w-full border-collapse table-fixed min-w-[850px]">
               <thead>
-                <tr className="bg-sky-50/70 border-b border-sky-100 text-sky-950 font-bold text-center text-base select-none">
+                {/* 📐 대제목 행은 가시성을 위해 그대로 유지하되 밸런스를 맞췄습니다. */}
+                <tr className="bg-sky-50/70 border-b border-sky-100 text-sky-950 font-bold text-center text-sm select-none">
                   <th className="p-3 border-r border-sky-100 w-[18%] cursor-pointer hover:bg-sky-100/50 transition-colors" onClick={() => handleSort('name')}>
                     <div className="flex items-center justify-center gap-1">이름 {renderSortIcon('name')}</div>
                   </th>
@@ -291,36 +291,37 @@ export default function Home() {
                   </tr>
                 ) : (
                   sortedPatterns.map((pattern) => (
-                    <tr key={pattern.id} className="border-b border-sky-50 hover:bg-sky-50/30 transition-colors text-base">
+                    // 📐 실제 내용 행들의 폰트 클래스를 text-sm으로 통일했습니다.
+                    <tr key={pattern.id} className="border-b border-sky-50 hover:bg-sky-50/30 transition-colors text-sm">
                       <td className="p-1 border-r border-sky-100 items-center justify-center">
-                        <textarea rows={1} value={pattern.name} onChange={(e) => handleCellChange(pattern.id, 'name', e.target.value)} className="w-full bg-transparent px-1.5 py-1 font-bold text-blue-600 text-center focus:bg-white focus:outline-sky-200 rounded resize-none overflow-hidden min-h-[36px]" onInput={(e) => { const t = e.target as HTMLTextAreaElement; t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; }} />
+                        <textarea rows={1} value={pattern.name} onChange={(e) => handleCellChange(pattern.id, 'name', e.target.value)} className="w-full bg-transparent px-1.5 py-1 font-bold text-blue-600 text-center focus:bg-white focus:outline-sky-200 rounded resize-none overflow-hidden min-h-[34px] text-sm" onInput={(e) => { const t = e.target as HTMLTextAreaElement; t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; }} />
                       </td>
                       <td className="p-1 border-r border-sky-100 items-center justify-center">
-                        <textarea rows={1} value={pattern.gauge} onChange={(e) => handleCellChange(pattern.id, 'gauge', e.target.value)} className="w-full bg-transparent px-1.5 py-1 font-medium text-gray-900 text-center focus:bg-white focus:outline-sky-200 rounded resize-none overflow-hidden min-h-[36px]" onInput={(e) => { const t = e.target as HTMLTextAreaElement; t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; }} />
+                        <textarea rows={1} value={pattern.gauge} onChange={(e) => handleCellChange(pattern.id, 'gauge', e.target.value)} className="w-full bg-transparent px-1.5 py-1 font-medium text-gray-900 text-center focus:bg-white focus:outline-sky-200 rounded resize-none overflow-hidden min-h-[34px] text-sm" onInput={(e) => { const t = e.target as HTMLTextAreaElement; t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; }} />
                       </td>
                       <td className="p-1 border-r border-sky-100 items-center justify-center">
-                        <textarea rows={1} value={pattern.type} onChange={(e) => handleCellChange(pattern.id, 'type', e.target.value)} className="w-full bg-transparent px-1.5 py-1 font-medium text-gray-900 text-center focus:bg-white focus:outline-sky-200 rounded resize-none overflow-hidden min-h-[36px]" onInput={(e) => { const t = e.target as HTMLTextAreaElement; t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; }} />
+                        <textarea rows={1} value={pattern.type} onChange={(e) => handleCellChange(pattern.id, 'type', e.target.value)} className="w-full bg-transparent px-1.5 py-1 font-medium text-gray-900 text-center focus:bg-white focus:outline-sky-200 rounded resize-none overflow-hidden min-h-[34px] text-sm" onInput={(e) => { const t = e.target as HTMLTextAreaElement; t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; }} />
                       </td>
                       <td className="p-1 border-r border-sky-100 items-center justify-center">
-                        <textarea rows={1} value={pattern.yarn} onChange={(e) => handleCellChange(pattern.id, 'yarn', e.target.value)} className="w-full bg-transparent px-1.5 py-1 font-medium text-gray-900 text-center focus:bg-white focus:outline-sky-200 rounded resize-none overflow-hidden min-h-[36px]" onInput={(e) => { const t = e.target as HTMLTextAreaElement; t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; }} />
+                        <textarea rows={1} value={pattern.yarn} onChange={(e) => handleCellChange(pattern.id, 'yarn', e.target.value)} className="w-full bg-transparent px-1.5 py-1 font-medium text-gray-900 text-center focus:bg-white focus:outline-sky-200 rounded resize-none overflow-hidden min-h-[34px] text-sm" onInput={(e) => { const t = e.target as HTMLTextAreaElement; t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; }} />
                       </td>
                       <td className="p-1 border-r border-sky-100 items-center justify-center">
-                        <textarea rows={1} value={pattern.yarnComponent} onChange={(e) => handleCellChange(pattern.id, 'yarnComponent', e.target.value)} className="w-full bg-transparent px-1.5 py-1 font-medium text-gray-900 text-center focus:bg-white focus:outline-sky-200 rounded resize-none overflow-hidden min-h-[36px]" onInput={(e) => { const t = e.target as HTMLTextAreaElement; t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; }} />
+                        <textarea rows={1} value={pattern.yarnComponent} onChange={(e) => handleCellChange(pattern.id, 'yarnComponent', e.target.value)} className="w-full bg-transparent px-1.5 py-1 font-medium text-gray-900 text-center focus:bg-white focus:outline-sky-200 rounded resize-none overflow-hidden min-h-[34px] text-sm" onInput={(e) => { const t = e.target as HTMLTextAreaElement; t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; }} />
                       </td>
                       <td className="p-1 border-r border-sky-100 items-center justify-center">
-                        <textarea rows={1} value={pattern.note} onChange={(e) => handleCellChange(pattern.id, 'note', e.target.value)} className="w-full bg-transparent px-1.5 py-1 font-medium text-gray-900 text-center focus:bg-white focus:outline-sky-200 rounded resize-none overflow-hidden min-h-[36px]" onInput={(e) => { const t = e.target as HTMLTextAreaElement; t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; }} />
+                        <textarea rows={1} value={pattern.note} onChange={(e) => handleCellChange(pattern.id, 'note', e.target.value)} className="w-full bg-transparent px-1.5 py-1 font-medium text-gray-900 text-center focus:bg-white focus:outline-sky-200 rounded resize-none overflow-hidden min-h-[34px] text-sm" onInput={(e) => { const t = e.target as HTMLTextAreaElement; t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; }} />
                       </td>
                       <td className="p-1 border-r border-sky-100 text-center">
-                        <div className="flex justify-center items-center h-full min-h-[36px]">
+                        <div className="flex justify-center items-center h-full min-h-[34px]">
                           {pattern.imageUrl ? (
-                            <img src={pattern.imageUrl} alt="preview" className="w-9 h-9 object-cover rounded-lg border border-sky-200 shadow-sm" />
+                            <img src={pattern.imageUrl} alt="preview" className="w-8 h-8 object-cover rounded-lg border border-sky-200 shadow-sm" />
                           ) : (
                             <span className="text-gray-400 text-xs">-</span>
                           )}
                         </div>
                       </td>
                       <td className="p-1 text-center">
-                        <div className="flex justify-center items-center h-full min-h-[36px]">
+                        <div className="flex justify-center items-center h-full min-h-[34px]">
                           <button onClick={() => deleteRow(pattern.id)} className="text-gray-400 hover:text-red-400 p-1 transition-colors">
                             <Trash2 className="w-4 h-4" />
                           </button>
