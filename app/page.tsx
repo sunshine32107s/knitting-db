@@ -199,7 +199,7 @@ export default function Home() {
 
       <div className="max-w-7xl mx-auto space-y-6 custom-cute-font text-base">
         
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
   <h1 className="text-3xl font-bold text-sky-900 tracking-tight">고래고래 도안 분석소</h1> {/* 👈 변경 */}
   <img src="/whale_m.gif" alt="title whale" className="w-16 h-16 object-contain" />
 </div>
