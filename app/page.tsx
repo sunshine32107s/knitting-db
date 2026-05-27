@@ -56,7 +56,6 @@ export default function Home() {
     };
   }, [patterns]);
 
-  // 📋 화면 어디서든 이미지를 붙여넣었을 때, 현재 마우스가 위치한 행을 찾아 사진을 매칭해주는 글로벌 감지 장치
   useEffect(() => {
     const handleGlobalPaste = async (e: ClipboardEvent) => {
       const items = e.clipboardData?.items;
@@ -308,8 +307,9 @@ export default function Home() {
           )}
         </div>
 
-        <div className="bg-white/95 backdrop-blur-sm border border-sky-100 rounded-2xl overflow-hidden shadow-md w-full">
-          <div className="overflow-x-auto w-full">
+        {/* 📐 [수정] 표 바깥 박스의 overflow-hidden을 지우고 overflow-x-auto만 유지하여 팝업창 탈출 성공! */}
+        <div className="bg-white/95 backdrop-blur-sm border border-sky-100 rounded-2xl shadow-md w-full">
+          <div className="overflow-x-auto w-full rounded-2xl">
             <table className="w-full border-collapse table-fixed min-w-[850px]">
               <thead>
                 <tr className="bg-sky-50/70 border-b border-sky-100 text-sky-950 font-bold text-center text-sm select-none">
@@ -384,7 +384,7 @@ export default function Home() {
                           <textarea rows={1} value={pattern.yarnComponent} onChange={(e) => handleCellChange(pattern.id, 'yarnComponent', e.target.value)} className="w-full bg-transparent px-1.5 py-1 font-semibold text-gray-500 text-center focus:bg-white focus:outline-sky-200 rounded resize-none overflow-hidden text-sm" onInput={(e) => { const t = e.target as HTMLTextAreaElement; t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; }} />
                         </div>
                       </td>
-                      <td className="p-1 border-r border-sky-100 text-center relative">
+                      <td className="p-1 border-r border-sky-100 text-center">
                         <div className="flex justify-center items-center min-h-[34px] w-full">
                           <input type="file" accept="image/*" className="hidden" ref={(el) => { rowImageInputRef.current[pattern.id] = el; }} onChange={(e) => { if (e.target.files?.[0]) handleRowImageUpload(pattern.id, e.target.files[0]); }} />
                           
@@ -406,16 +406,16 @@ export default function Home() {
                               )}
                             </button>
 
-                            {/* 🛠️ [긴급 수정] 세로로 찌그러지지 않도록 min-width 확보 및 object-cover 강제 장착 */}
+                            {/* 📐 [수정] 팝업 위치를 bottom-full에서 top-full(아래로 열림)로 바꾸고 최상위 z-50을 주어 표 테두리에 절대 안 잘리게 개조 */}
                             {pattern.imageUrl && (
-                              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover/preview:block z-50 pointer-events-none animate-in fade-in duration-200">
-                                <div className="p-2 bg-white border-2 border-sky-200 rounded-xl shadow-2xl bg-white/95 backdrop-blur-sm min-w-[200px]">
+                              <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 hidden group-hover/preview:block z-50 pointer-events-none">
+                                <div className="p-2 bg-white border-2 border-sky-200 rounded-xl shadow-2xl bg-white/95 backdrop-blur-sm w-[208px]">
                                   <img 
                                     src={pattern.imageUrl} 
                                     alt="Large Preview" 
                                     className="w-48 h-48 object-cover rounded-lg border border-sky-100 block"
                                   />
-                                  <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-2.5 h-2.5 bg-white border-b-2 border-r-2 border-sky-200 rotate-45"></div>
+                                  <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-2.5 h-2.5 bg-white border-t-2 border-l-2 border-sky-200 rotate-45"></div>
                                 </div>
                               </div>
                             )}
