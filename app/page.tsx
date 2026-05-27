@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Upload, Plus, Trash2 } from 'lucide-react';
 
 interface Pattern {
@@ -14,17 +14,32 @@ interface Pattern {
   imageUrl?: string;
 }
 
-const initialData: Pattern[] = [
-  { id: 1, name: '울알코 브이넥 조끼', gauge: '11.5*17', type: '조끼', yarn: '', yarnComponent: '', note: '' },
-  { id: 2, name: 'Calais', gauge: '11.5*18', type: '대바늘 소품', yarn: '', yarnComponent: '', note: '영어 / 망토' },
-  { id: 3, name: '레인드롭티', gauge: '12*17', type: '스웨터', yarn: '레이니', yarnComponent: '', note: '' },
-  { id: 4, name: 'Church of Clouds', gauge: '12*19', type: '스웨터', yarn: '', yarnComponent: '', note: '영어 / 목' },
-];
-
 export default function Home() {
-  const [patterns, setPatterns] = useState<Pattern[]>(initialData);
+  // [수정] 처음에 예시 데이터 4개를 보여주던 배열을 완전히 비우고, 로딩 표시를 추가합니다.
+  const [patterns, setPatterns] = useState<Pattern[]>([]);
   const [loading, setLoading] = useState(false);
+  const [dataLoading, setDataLoading] = useState(true); // DB 로딩 상태
   const [dragActive, setDragActive] = useState(false);
+
+  // 🏛️ 사이트 열리자마자 진짜 DB 창고에서 도안 리스트 가져오기
+  useEffect(() => {
+    fetchPatterns();
+  }, []);
+
+  const fetchPatterns = async () => {
+    try {
+      setDataLoading(true);
+      const response = await fetch('/api/patterns');
+      if (response.ok) {
+        const data = await response.json();
+        setPatterns(data);
+      }
+    } catch (error) {
+      console.error('도안을 불러오는 중 오류 발생:', error);
+    } finally {
+      setDataLoading(false);
+    }
+  };
 
   const fileToDataUrl = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -35,6 +50,7 @@ export default function Home() {
     });
   };
 
+  // 🐳 도안 업로드 및 AI 분석 후 DB 자동 저장
   const handleFileUpload = async (file: File) => {
     setLoading(true);
     const formData = new FormData();
@@ -54,7 +70,6 @@ export default function Home() {
       
       const aiResult = await response.json();
 
-      // [변경] 만약 AI 분석 결과에 무늬 게이지 성격이 감지되면 표기 방식 보완
       let displayGauge = aiResult.gauge || '-';
       if (aiResult.isPatternGauge || displayGauge.includes('무늬') || displayGauge.includes('pattern')) {
         if (!displayGauge.includes('무늬')) {
@@ -62,56 +77,97 @@ export default function Home() {
         }
       }
 
-      const newPattern: Pattern = {
-        id: Date.now(),
+      const newPattern = {
         name: aiResult.name || '새 도안 항목',
         gauge: displayGauge,
         type: aiResult.type || '미분류',
         yarn: aiResult.yarn || '-',
         yarnComponent: aiResult.yarnComponent || '-',
         note: aiResult.note || '-',
-        imageUrl: imageUrl || undefined
+        imageUrl: imageUrl || ''
       };
 
-      setPatterns((prev) => [newPattern, ...prev]);
+      // 💾 DB에 데이터 진짜로 저장하기
+      const saveResponse = await fetch('/api/patterns', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newPattern),
+      });
+
+      if (saveResponse.ok) {
+        fetchPatterns(); // 등록 후 최신 목록 다시 로드
+      }
     } catch (error) {
-      alert('도안을 읽는 중 오류가 발생했습니다. 다시 시도해 주세요.');
+      alert('도안을 읽거나 저장하는 중 오류가 발생했습니다.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCellChange = (id: number, field: keyof Pattern, value: string) => {
+  // ✏️ 셀 내용 수정 시 DB 실시간 업데이트
+  const handleCellChange = async (id: number, field: keyof Pattern, value: string) => {
     setPatterns((prev) =>
       prev.map((item) => (item.id === id ? { ...item, [field]: value } : item))
     );
+
+    try {
+      await fetch('/api/patterns', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, field, value }),
+      });
+    } catch (error) {
+      console.error('업데이트 실패:', error);
+    }
   };
 
-  const deleteRow = (id: number) => {
+  // 🗑️ 도안 삭제
+  const deleteRow = async (id: number) => {
     setPatterns((prev) => prev.filter((item) => item.id !== id));
+    try {
+      await fetch(`/api/patterns?id=${id}`, { method: 'DELETE' });
+    } catch (error) {
+      console.error('삭제 실패:', error);
+    }
+  };
+
+  // ➕ 빈 항목 수동 추가
+  const handleAddRow = async () => {
+    const emptyRow = {
+      name: '새 도안 항목',
+      gauge: '',
+      type: '',
+      yarn: '',
+      yarnComponent: '',
+      note: '',
+      imageUrl: ''
+    };
+
+    try {
+      const response = await fetch('/api/patterns', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(emptyRow),
+      });
+      if (response.ok) fetchPatterns();
+    } catch (error) {
+      console.error('추가 실패:', error);
+    }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-tr from-sky-100 via-blue-50 to-emerald-50 p-8 text-gray-900 font-sans tracking-wide">
-      
-      {/* 구글 웹폰트 'Gowun Dodum' (고운 돋움) 불러오기 */}
       <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet" />
-      <style>{`
-        .custom-cute-font {
-          font-family: 'Gowun Dodum', sans-serif;
-        }
-      `}</style>
+      <style>{`.custom-cute-font { font-family: 'Gowun Dodum', sans-serif; }`}</style>
 
       <div className="max-w-7xl mx-auto space-y-6 custom-cute-font text-base">
         
-        {/* 대제목 영역 - 고래 크기 1.5배 업그레이드 (w-16 h-16) 및 정렬 미세조정 */}
         <div className="flex items-center gap-4">
           <h1 className="text-3xl font-bold text-sky-900 tracking-tight">고래고래 도안 저장소</h1>
           <img src="/whale_m.gif" alt="title whale" className="w-16 h-16 object-contain" />
         </div>
-        <p className="text-sm text-sky-600/80 mt-1">도안을 업로드하면 AI가 정리해 줍니다. 직접 수정도 가능해요!</p>
+        <p className="text-sm text-sky-600/80 mt-1">도안을 업로드하면 AI가 정리해 줍니다. 평생 보관이 가능해요!</p>
 
-        {/* 슬림해진 업로드 창 */}
         <div 
           onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
           onDragLeave={() => setDragActive(false)}
@@ -123,17 +179,9 @@ export default function Home() {
         >
           <input id="fileInput" type="file" accept="image/*,application/pdf" className="hidden" onChange={(e) => { if(e.target.files?.[0]) handleFileUpload(e.target.files[0]); }} />
           
-          {/* 로딩 창 고래 애니메이션 구조 유지 */}
           {loading ? (
             <div className="flex flex-row items-center justify-center gap-3 py-1">
-              <img 
-                src="/whale.gif" 
-                alt="whale loading" 
-                className="w-12 h-12 object-contain"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src = "https://cdn-icons-png.flaticon.com/512/17510/17510100.png";
-                }}
-              />
+              <img src="/whale.gif" alt="whale loading" className="w-12 h-12 object-contain" />
               <p className="text-sm font-medium text-sky-800">고래가 도안을 열심히 읽고 있어요...</p>
             </div>
           ) : (
@@ -144,7 +192,6 @@ export default function Home() {
           )}
         </div>
 
-        {/* 도안 테이블 영역 */}
         <div className="bg-white/95 backdrop-blur-sm border border-sky-100 rounded-2xl overflow-hidden shadow-md">
           <div className="overflow-x-auto">
             <table className="w-full border-collapse table-fixed min-w-[900px]">
@@ -161,47 +208,61 @@ export default function Home() {
                 </tr>
               </thead>
               <tbody>
-                {patterns.map((pattern) => (
-                  <tr key={pattern.id} className="border-b border-sky-50 hover:bg-sky-50/30 transition-colors text-base">
-                    <td className="p-2 border-r border-sky-100 text-center">
-                      <input type="text" value={pattern.name} onChange={(e) => handleCellChange(pattern.id, 'name', e.target.value)} className="w-full bg-transparent px-2 py-1 font-bold text-blue-600 text-center focus:bg-white focus:outline-sky-200 rounded" />
-                    </td>
-                    <td className="p-2 border-r border-sky-100 text-center">
-                      <input type="text" value={pattern.gauge} onChange={(e) => handleCellChange(pattern.id, 'gauge', e.target.value)} className="w-full bg-transparent px-2 py-1 font-medium text-gray-900 text-center focus:bg-white focus:outline-sky-200 rounded" />
-                    </td>
-                    <td className="p-2 border-r border-sky-100 text-center">
-                      <input type="text" value={pattern.type} onChange={(e) => handleCellChange(pattern.id, 'type', e.target.value)} className="w-full bg-transparent px-2 py-1 font-medium text-gray-900 text-center focus:bg-white focus:outline-sky-200 rounded" />
-                    </td>
-                    <td className="p-2 border-r border-sky-100 text-center">
-                      <input type="text" value={pattern.yarn} onChange={(e) => handleCellChange(pattern.id, 'yarn', e.target.value)} className="w-full bg-transparent px-2 py-1 font-medium text-gray-900 text-center focus:bg-white focus:outline-sky-200 rounded" />
-                    </td>
-                    <td className="p-2 border-r border-sky-100 text-center">
-                      <input type="text" value={pattern.yarnComponent} onChange={(e) => handleCellChange(pattern.id, 'yarnComponent', e.target.value)} className="w-full bg-transparent px-2 py-1 font-medium text-gray-900 text-center focus:bg-white focus:outline-sky-200 rounded" />
-                    </td>
-                    <td className="p-2 border-r border-sky-100 text-center">
-                      <input type="text" value={pattern.note} onChange={(e) => handleCellChange(pattern.id, 'note', e.target.value)} className="w-full bg-transparent px-2 py-1 font-medium text-gray-900 text-center focus:bg-white focus:outline-sky-200 rounded" />
-                    </td>
-                    <td className="p-2 border-r border-sky-100 text-center">
-                      <div className="flex justify-center items-center">
-                        {pattern.imageUrl ? (
-                          <img src={pattern.imageUrl} alt="preview" className="w-10 h-10 object-cover rounded-lg border border-sky-200 shadow-sm" />
-                        ) : (
-                          <span className="text-gray-400">-</span>
-                        )}
-                      </div>
-                    </td>
-                    <td className="p-2 text-center">
-                      <button onClick={() => deleteRow(pattern.id)} className="text-gray-400 hover:text-red-400 p-1 transition-colors">
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                {dataLoading ? (
+                  <tr>
+                    <td colSpan={8} className="p-8 text-center text-gray-400 text-sm">
+                      창고에서 도안 데이터를 불러오는 중입니다...
                     </td>
                   </tr>
-                ))}
+                ) : patterns.length === 0 ? (
+                  <tr>
+                    <td colSpan={8} className="p-8 text-center text-gray-400 text-sm">
+                      아직 저장된 도안이 없습니다. 첫 도안을 등록해 보세요! 🧶
+                    </td>
+                  </tr>
+                ) : (
+                  patterns.map((pattern) => (
+                    <tr key={pattern.id} className="border-b border-sky-50 hover:bg-sky-50/30 transition-colors text-base">
+                      <td className="p-2 border-r border-sky-100 text-center">
+                        <input type="text" value={pattern.name} onChange={(e) => handleCellChange(pattern.id, 'name', e.target.value)} className="w-full bg-transparent px-2 py-1 font-bold text-blue-600 text-center focus:bg-white focus:outline-sky-200 rounded" />
+                      </td>
+                      <td className="p-2 border-r border-sky-100 text-center">
+                        <input type="text" value={pattern.gauge} onChange={(e) => handleCellChange(pattern.id, 'gauge', e.target.value)} className="w-full bg-transparent px-2 py-1 font-medium text-gray-900 text-center focus:bg-white focus:outline-sky-200 rounded" />
+                      </td>
+                      <td className="p-2 border-r border-sky-100 text-center">
+                        <input type="text" value={pattern.type} onChange={(e) => handleCellChange(pattern.id, 'type', e.target.value)} className="w-full bg-transparent px-2 py-1 font-medium text-gray-900 text-center focus:bg-white focus:outline-sky-200 rounded" />
+                      </td>
+                      <td className="p-2 border-r border-sky-100 text-center">
+                        <input type="text" value={pattern.yarn} onChange={(e) => handleCellChange(pattern.id, 'yarn', e.target.value)} className="w-full bg-transparent px-2 py-1 font-medium text-gray-900 text-center focus:bg-white focus:outline-sky-200 rounded" />
+                      </td>
+                      <td className="p-2 border-r border-sky-100 text-center">
+                        <input type="text" value={pattern.yarnComponent} onChange={(e) => handleCellChange(pattern.id, 'yarnComponent', e.target.value)} className="w-full bg-transparent px-2 py-1 font-medium text-gray-900 text-center focus:bg-white focus:outline-sky-200 rounded" />
+                      </td>
+                      <td className="p-2 border-r border-sky-100 text-center">
+                        <input type="text" value={pattern.note} onChange={(e) => handleCellChange(pattern.id, 'note', e.target.value)} className="w-full bg-transparent px-2 py-1 font-medium text-gray-900 text-center focus:bg-white focus:outline-sky-200 rounded" />
+                      </td>
+                      <td className="p-2 border-r border-sky-100 text-center">
+                        <div className="flex justify-center items-center">
+                          {pattern.imageUrl ? (
+                            <img src={pattern.imageUrl} alt="preview" className="w-10 h-10 object-cover rounded-lg border border-sky-200 shadow-sm" />
+                          ) : (
+                            <span className="text-gray-400">-</span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="p-2 text-center">
+                        <button onClick={() => deleteRow(pattern.id)} className="text-gray-400 hover:text-red-400 p-1 transition-colors">
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
           <div className="p-3 bg-sky-50/20 border-t border-sky-50">
-            <button onClick={() => setPatterns(prev => [{ id: Date.now(), name: '새 도안 항목', gauge: '', type: '', yarn: '', yarnComponent: '', note: '' }, ...prev])} className="flex items-center gap-1.5 text-sm text-sky-600 hover:text-sky-800 font-semibold transition-colors">
+            <button onClick={handleAddRow} className="flex items-center gap-1.5 text-sm text-sky-600 hover:text-sky-800 font-semibold transition-colors">
               <Plus className="w-3.5 h-3.5" /> 새로 만들기
             </button>
           </div>
