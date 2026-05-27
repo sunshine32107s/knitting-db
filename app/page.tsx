@@ -94,8 +94,8 @@ export default function Home() {
       
       const aiResult = await response.json();
       
-      // 🔢 [수정] 게이지에 빈칸이 생기지 않도록 가로막는 안전장치 적용
-      let displayGauge = aiResult.gauge ? String(aiResult.gauge).trim() : '';
+      // 📐 [2중 안전장치] 게이지 텍스트 내부의 모든 공백(띄어쓰기)을 강제로 소멸시킵니다.
+      let displayGauge = aiResult.gauge ? String(aiResult.gauge).replace(/\s+/g, '') : '';
       if (!displayGauge || displayGauge === '-') {
         displayGauge = '0'; 
       }
@@ -107,7 +107,7 @@ export default function Home() {
         yarn: aiResult.yarn || '-',
         yarnComponent: aiResult.yarnComponent || '-',
         note: aiResult.note || '-',
-        imageUrl: '' // 착샷은 사용자가 직접 수동으로 올릴 수 있게 깨끗하게 비워서 시작
+        imageUrl: '' 
       };
 
       const saveResponse = await fetch('/api/patterns', {
@@ -127,15 +127,18 @@ export default function Home() {
   };
 
   const handleCellChange = async (id: number, field: keyof Pattern, value: string) => {
+    // 사용자가 직접 타이핑할 때도 게이지 칸이면 공백을 자동으로 지워줍니다.
+    const cleanedValue = field === 'gauge' ? value.replace(/\s+/g, '') : value;
+
     setPatterns((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, [field]: value } : item))
+      prev.map((item) => (item.id === id ? { ...item, [field]: cleanedValue } : item))
     );
 
     try {
       await fetch('/api/patterns', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, field, value }),
+        body: JSON.stringify({ id, field, value: cleanedValue }),
       });
       setTimeout(adjustTextareasHeight, 10);
     } catch (error) {
@@ -143,17 +146,12 @@ export default function Home() {
     }
   };
 
-  // 📸 [신규] 사용자가 행 안에서 직접 착샷 사진을 선택해 저장하는 함수
   const handleRowImageUpload = async (id: number, file: File) => {
     try {
       const base64Url = await fileToDataUrl(file);
-      
-      // 화면 실시간 업데이트
       setPatterns((prev) =>
         prev.map((item) => (item.id === id ? { ...item, imageUrl: base64Url } : item))
       );
-
-      // DB 진짜로 저장
       await fetch('/api/patterns', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -176,7 +174,7 @@ export default function Home() {
   const handleAddRow = async () => {
     const emptyRow = {
       name: '새 도안 항목',
-      gauge: '0', // 수동 추가할 때도 빈칸 생기지 않게 기본값 고정
+      gauge: '0', 
       type: '',
       yarn: '',
       yarnComponent: '',
@@ -317,7 +315,6 @@ export default function Home() {
                           <textarea rows={1} value={pattern.name} onChange={(e) => handleCellChange(pattern.id, 'name', e.target.value)} className="w-full bg-transparent px-1.5 py-1 font-bold text-blue-700 text-center focus:bg-white focus:outline-sky-200 rounded resize-none overflow-hidden text-sm" onInput={(e) => { const t = e.target as HTMLTextAreaElement; t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; }} />
                         </div>
                       </td>
-                      {/* 🎨 [수정] 본문 텍스트 색상을 완벽한 감성 조합인 text-gray-500 및 font-semibold로 전면 교정 완료! */}
                       <td className="p-1 border-r border-sky-100">
                         <div className="flex items-center justify-center min-h-[34px] w-full">
                           <textarea rows={1} value={pattern.gauge} onChange={(e) => handleCellChange(pattern.id, 'gauge', e.target.value)} className="w-full bg-transparent px-1.5 py-1 font-semibold text-gray-500 text-center focus:bg-white focus:outline-sky-200 rounded resize-none overflow-hidden text-sm" onInput={(e) => { const t = e.target as HTMLTextAreaElement; t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; }} />
@@ -343,7 +340,6 @@ export default function Home() {
                           <textarea rows={1} value={pattern.yarnComponent} onChange={(e) => handleCellChange(pattern.id, 'yarnComponent', e.target.value)} className="w-full bg-transparent px-1.5 py-1 font-semibold text-gray-500 text-center focus:bg-white focus:outline-sky-200 rounded resize-none overflow-hidden text-sm" onInput={(e) => { const t = e.target as HTMLTextAreaElement; t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; }} />
                         </div>
                       </td>
-                      {/* 📸 [수정] 착샷 칸을 누르면 수동으로 내 뜨개 사진을 즉시 업로드할 수 있는 대공사 반영 */}
                       <td className="p-1 border-r border-sky-100 text-center">
                         <div className="flex justify-center items-center min-h-[34px] w-full">
                           <input type="file" accept="image/*" className="hidden" ref={(el) => { rowImageInputRef.current[pattern.id] = el; }} onChange={(e) => { if (e.target.files?.[0]) handleRowImageUpload(pattern.id, e.target.files[0]); }} />
