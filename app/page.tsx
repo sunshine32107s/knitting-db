@@ -94,7 +94,6 @@ export default function Home() {
       
       const aiResult = await response.json();
       
-      // 📐 [2중 안전장치] 게이지 텍스트 내부의 모든 공백(띄어쓰기)을 강제로 소멸시킵니다.
       let displayGauge = aiResult.gauge ? String(aiResult.gauge).replace(/\s+/g, '') : '';
       if (!displayGauge || displayGauge === '-') {
         displayGauge = '0'; 
@@ -127,7 +126,6 @@ export default function Home() {
   };
 
   const handleCellChange = async (id: number, field: keyof Pattern, value: string) => {
-    // 사용자가 직접 타이핑할 때도 게이지 칸이면 공백을 자동으로 지워줍니다.
     const cleanedValue = field === 'gauge' ? value.replace(/\s+/g, '') : value;
 
     setPatterns((prev) =>
@@ -159,6 +157,23 @@ export default function Home() {
       });
     } catch (error) {
       alert('이미지 업로드에 실패했습니다.');
+    }
+  };
+
+  // 📋 [신규] 착샷 칸에서 이미지 복사붙여넣기(Ctrl+V) 감지 및 변환 장치
+  const handlePasteImage = async (id: number, e: React.ClipboardEvent) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type.indexOf('image') !== -1) {
+        const file = items[i].getAsFile();
+        if (file) {
+          e.preventDefault(); // 붙여넣기 기본 동작 막음
+          await handleRowImageUpload(id, file);
+          break;
+        }
+      }
     }
   };
 
@@ -208,9 +223,9 @@ export default function Home() {
   };
 
   const renderSortIcon = (field: SortField) => {
-    if (sortField !== field) return <ArrowUpDown className="w-3.5 h-3.5 text-gray-400" />;
-    if (sortOrder === 'asc') return <ArrowUp className="w-3.5 h-3.5 text-blue-700" />;
-    return <ArrowDown className="w-3.5 h-3.5 text-blue-700" />;
+    if (sortField !== field) return <ArrowUpDown className="w-3.5 h-3.5 text-gray-400"/>;
+    if (sortOrder === 'asc') return <ArrowUp className="w-3.5 h-3.5 text-blue-700"/>;
+    return <ArrowDown className="w-3.5 h-3.5 text-blue-700"/>;
   };
 
   const getSortedPatterns = () => {
@@ -261,7 +276,7 @@ export default function Home() {
             </div>
           ) : (
             <div className="flex items-center justify-center gap-2 py-1">
-              <Upload className="w-5 h-5 text-sky-400" />
+              <Upload className="w-5 h-5 text-sky-400"/>
               <p className="text-sm font-medium text-gray-700">여기에 도안 이미지나 PDF를 올려주세요. 채우는 건 AI가 할게요!</p>
             </div>
           )}
@@ -340,19 +355,25 @@ export default function Home() {
                           <textarea rows={1} value={pattern.yarnComponent} onChange={(e) => handleCellChange(pattern.id, 'yarnComponent', e.target.value)} className="w-full bg-transparent px-1.5 py-1 font-semibold text-gray-500 text-center focus:bg-white focus:outline-sky-200 rounded resize-none overflow-hidden text-sm" onInput={(e) => { const t = e.target as HTMLTextAreaElement; t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; }} />
                         </div>
                       </td>
+                      
                       <td className="p-1 border-r border-sky-100 text-center">
                         <div className="flex justify-center items-center min-h-[34px] w-full">
                           <input type="file" accept="image/*" className="hidden" ref={(el) => { rowImageInputRef.current[pattern.id] = el; }} onChange={(e) => { if (e.target.files?.[0]) handleRowImageUpload(pattern.id, e.target.files[0]); }} />
-                          <button onClick={() => rowImageInputRef.current[pattern.id]?.click()} className="group relative flex items-center justify-center w-8 h-8 rounded-lg border border-sky-200 bg-sky-50/30 hover:bg-sky-100/50 transition-all overflow-hidden shadow-sm" title="착샷 올리기">
+                          <button 
+                            onClick={() => rowImageInputRef.current[pattern.id]?.click()} 
+                            onPaste={(e) => handlePasteImage(pattern.id, e)}
+                            className="group relative flex items-center justify-center w-8 h-8 rounded-lg border border-sky-200 bg-sky-50/30 hover:bg-sky-100/50 focus:outline-sky-300 focus:ring-1 focus:ring-sky-300 transition-all overflow-hidden shadow-sm" 
+                            title="클릭해서 업로드하거나, 포커스 후 Ctrl+V로 이미지 붙여넣기"
+                          >
                             {pattern.imageUrl ? (
                               <>
                                 <img src={pattern.imageUrl} alt="preview" className="w-full h-full object-cover group-hover:opacity-40 transition-opacity" />
                                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                  <Camera className="w-3.5 h-3.5 text-sky-700" />
+                                  <Camera className="w-3.5 h-3.5 text-sky-700"/>
                                 </div>
                               </>
                             ) : (
-                              <Camera className="w-4 h-4 text-sky-400 group-hover:text-sky-600 transition-colors" />
+                              <Camera className="w-4 h-4 text-sky-400 group-hover:text-sky-600 transition-colors"/>
                             )}
                           </button>
                         </div>
@@ -360,7 +381,7 @@ export default function Home() {
                       <td className="p-1 text-center">
                         <div className="flex justify-center items-center min-h-[34px] w-full">
                           <button onClick={() => deleteRow(pattern.id)} className="text-neutral-400 hover:text-red-500 p-1 transition-colors">
-                            <Trash2 className="w-4 h-4" />
+                            <Trash2 className="w-4 h-4"/>
                           </button>
                         </div>
                       </td>
@@ -372,7 +393,7 @@ export default function Home() {
           </div>
           <div className="p-3 bg-sky-50/20 border-t border-sky-50">
             <button onClick={handleAddRow} className="flex items-center gap-1.5 text-sm text-sky-600 hover:text-sky-800 font-semibold transition-colors">
-              <Plus className="w-3.5 h-3.5" /> 새로 만들기
+              <Plus className="w-3.5 h-3.5"/> 새로 만들기
             </button>
           </div>
         </div>
