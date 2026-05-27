@@ -251,7 +251,7 @@ export default function Home() {
           <div className="overflow-x-auto w-full">
             <table className="w-full border-collapse table-fixed min-w-[850px]">
               <thead>
-                <tr className="bg-sky-50/70 border-b border-sky-100 text-sky-950 font-bold text-center text-sm select-none">
+                <tr className="bg-sky-50/70 border-b border-sky-100 text-sky-950 font-semibold text-center text-sm select-none">
                   <th className="p-1.5 border-r border-sky-100 w-[18%] cursor-pointer hover:bg-sky-100/50 transition-colors" onClick={() => handleSort('name')}>
                     <div className="flex items-center justify-center gap-1">이름 {renderSortIcon('name')}</div>
                   </th>
