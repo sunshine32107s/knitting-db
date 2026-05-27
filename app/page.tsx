@@ -23,7 +23,6 @@ export default function Home() {
   const [dataLoading, setDataLoading] = useState(true);
   const [dragActive, setDragActive] = useState(false);
 
-  // ↕️ 정렬 상태 정하기 (어떤 필드인지, 오름차순인지 내림차순인지)
   const [sortField, setSortField] = useState<SortField | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>(null);
 
@@ -155,7 +154,6 @@ export default function Home() {
     }
   };
 
-  // ↕️ 클릭 시 정렬 상태를 토글해 주는 함수
   const handleSort = (field: SortField) => {
     if (sortField === field) {
       if (sortOrder === 'asc') setSortOrder('desc');
@@ -169,14 +167,12 @@ export default function Home() {
     }
   };
 
-  // ↕️ 정렬 아이콘을 동적으로 그려주는 함수
   const renderSortIcon = (field: SortField) => {
     if (sortField !== field) return <ArrowUpDown className="w-3.5 h-3.5 text-gray-400" />;
     if (sortOrder === 'asc') return <ArrowUp className="w-3.5 h-3.5 text-blue-600" />;
     return <ArrowDown className="w-3.5 h-3.5 text-blue-600" />;
   };
 
-  // ↕️ 현재 정렬 기준에 맞춰 데이터를 줄 세워주는 함수
   const getSortedPatterns = () => {
     if (!sortField || !sortOrder) return patterns;
 
@@ -193,18 +189,18 @@ export default function Home() {
   const sortedPatterns = getSortedPatterns();
 
   return (
-    <div className="min-h-screen bg-gradient-to-tr from-sky-100 via-blue-50 to-emerald-50 p-8 text-gray-900 font-sans tracking-wide">
+    <div className="min-h-screen bg-gradient-to-tr from-sky-100 via-blue-50 to-emerald-50 p-4 md:p-8 text-gray-900 font-sans tracking-wide">
       <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet" />
       <style>{`.custom-cute-font { font-family: 'Gowun Dodum', sans-serif; }`}</style>
 
       <div className="max-w-7xl mx-auto space-y-6 custom-cute-font text-base">
         
-        <div className="flex items-center gap-2">
-  <h1 className="text-3xl font-bold text-sky-900 tracking-tight">고래고래 도안 분석소</h1> {/* 👈 변경 */}
-  <img src="/whale_m.gif" alt="title whale" className="w-16 h-16 object-contain" />
-</div>
-<p className="text-sm text-sky-600/80 mt-1">도안을 업로드하면 AI가 꼼꼼하게 분석해 줍니다. 헤더를 클릭해 정렬해 보세요!</p> {/* 👈 변경 */}
-          
+        <div className="flex items-center gap-1.5">
+          <h1 className="text-3xl font-bold text-sky-900 tracking-tight">고래고래 도안 분석소</h1>
+          <img src="/whale_m.gif" alt="title whale" className="w-16 h-16 object-contain" />
+        </div>
+        <p className="text-sm text-sky-600/80 mt-1">도안을 업로드하면 AI가 꼼꼼하게 분석해 줍니다. 헤더를 클릭해 정렬해 보세요!</p>
+
         <div 
           onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
           onDragLeave={() => setDragActive(false)}
@@ -229,32 +225,32 @@ export default function Home() {
           )}
         </div>
 
-        <div className="bg-white/95 backdrop-blur-sm border border-sky-100 rounded-2xl overflow-hidden shadow-md">
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse table-fixed min-w-[900px]">
+        {/* 📱 무조건 화면 너비에 100% 맞춰지도록 고정하고, 표 구조 개선 */}
+        <div className="bg-white/95 backdrop-blur-sm border border-sky-100 rounded-2xl overflow-hidden shadow-md w-full">
+          <div className="overflow-x-auto w-full">
+            <table className="w-full border-collapse table-fixed min-w-[750px]">
               <thead>
                 <tr className="bg-sky-50/70 border-b border-sky-100 text-sky-950 font-bold text-center text-base select-none">
-                  {/* [정렬 기능 구현] 클릭하면 정렬되는 헤더 컬럼들 */}
-                  <th className="p-3 border-r border-sky-100 w-[22%] cursor-pointer hover:bg-sky-100/50 transition-colors" onClick={() => handleSort('name')}>
+                  <th className="p-3 border-r border-sky-100 w-[20%] cursor-pointer hover:bg-sky-100/50 transition-colors" onClick={() => handleSort('name')}>
                     <div className="flex items-center justify-center gap-1">이름 {renderSortIcon('name')}</div>
                   </th>
-                  <th className="p-3 border-r border-sky-100 w-[12%] cursor-pointer hover:bg-sky-100/50 transition-colors" onClick={() => handleSort('gauge')}>
+                  <th className="p-3 border-r border-sky-100 w-[11%] cursor-pointer hover:bg-sky-100/50 transition-colors" onClick={() => handleSort('gauge')}>
                     <div className="flex items-center justify-center gap-1">게이지 {renderSortIcon('gauge')}</div>
                   </th>
-                  <th className="p-3 border-r border-sky-100 w-[13%] cursor-pointer hover:bg-sky-100/50 transition-colors" onClick={() => handleSort('type')}>
+                  <th className="p-3 border-r border-sky-100 w-[11%] cursor-pointer hover:bg-sky-100/50 transition-colors" onClick={() => handleSort('type')}>
                     <div className="flex items-center justify-center gap-1">종류 {renderSortIcon('type')}</div>
                   </th>
                   <th className="p-3 border-r border-sky-100 w-[15%] cursor-pointer hover:bg-sky-100/50 transition-colors" onClick={() => handleSort('yarn')}>
                     <div className="flex items-center justify-center gap-1">원작 실 {renderSortIcon('yarn')}</div>
                   </th>
-                  <th className="p-3 border-r border-sky-100 w-[15%] cursor-pointer hover:bg-sky-100/50 transition-colors" onClick={() => handleSort('yarnComponent')}>
+                  <th className="p-3 border-r border-sky-100 w-[17%] cursor-pointer hover:bg-sky-100/50 transition-colors" onClick={() => handleSort('yarnComponent')}>
                     <div className="flex items-center justify-center gap-1">원작 실 성분 {renderSortIcon('yarnComponent')}</div>
                   </th>
-                  <th className="p-3 border-r border-sky-100 w-[15%] cursor-pointer hover:bg-sky-100/50 transition-colors" onClick={() => handleSort('note')}>
+                  <th className="p-3 border-r border-sky-100 w-[16%] cursor-pointer hover:bg-sky-100/50 transition-colors" onClick={() => handleSort('note')}>
                     <div className="flex items-center justify-center gap-1">특징 {renderSortIcon('note')}</div>
                   </th>
-                  <th className="p-3 border-r border-sky-100 w-[8%]">착샷</th>
-                  <th className="p-3 w-[5%]">삭제</th>
+                  <th className="p-3 border-r border-sky-100 w-[6%]">착샷</th>
+                  <th className="p-3 w-[4%]">삭제</th>
                 </tr>
               </thead>
               <tbody>
@@ -273,34 +269,35 @@ export default function Home() {
                 ) : (
                   sortedPatterns.map((pattern) => (
                     <tr key={pattern.id} className="border-b border-sky-50 hover:bg-sky-50/30 transition-colors text-base">
-                      <td className="p-2 border-r border-sky-100 text-center">
-                        <input type="text" value={pattern.name} onChange={(e) => handleCellChange(pattern.id, 'name', e.target.value)} className="w-full bg-transparent px-2 py-1 font-bold text-blue-600 text-center focus:bg-white focus:outline-sky-200 rounded" />
+                      {/* ✍️ [자동 줄바꿈 적용] 기존 input창을 textarea로 전면 교체하여 높이가 글자 길이에 따라 유연하게 늘어납니다 */}
+                      <td className="p-1 border-r border-sky-100">
+                        <textarea rows={1} value={pattern.name} onChange={(e) => handleCellChange(pattern.id, 'name', e.target.value)} className="w-full bg-transparent px-1.5 py-1 font-bold text-blue-600 text-center focus:bg-white focus:outline-sky-200 rounded resize-none overflow-hidden min-h-[36px] align-middle" onInput={(e) => { const t = e.target as HTMLTextAreaElement; t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; }} />
                       </td>
-                      <td className="p-2 border-r border-sky-100 text-center">
-                        <input type="text" value={pattern.gauge} onChange={(e) => handleCellChange(pattern.id, 'gauge', e.target.value)} className="w-full bg-transparent px-2 py-1 font-medium text-gray-900 text-center focus:bg-white focus:outline-sky-200 rounded" />
+                      <td className="p-1 border-r border-sky-100">
+                        <textarea rows={1} value={pattern.gauge} onChange={(e) => handleCellChange(pattern.id, 'gauge', e.target.value)} className="w-full bg-transparent px-1.5 py-1 font-medium text-gray-900 text-center focus:bg-white focus:outline-sky-200 rounded resize-none overflow-hidden min-h-[36px] align-middle" onInput={(e) => { const t = e.target as HTMLTextAreaElement; t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; }} />
                       </td>
-                      <td className="p-2 border-r border-sky-100 text-center">
-                        <input type="text" value={pattern.type} onChange={(e) => handleCellChange(pattern.id, 'type', e.target.value)} className="w-full bg-transparent px-2 py-1 font-medium text-gray-900 text-center focus:bg-white focus:outline-sky-200 rounded" />
+                      <td className="p-1 border-r border-sky-100">
+                        <textarea rows={1} value={pattern.type} onChange={(e) => handleCellChange(pattern.id, 'type', e.target.value)} className="w-full bg-transparent px-1.5 py-1 font-medium text-gray-900 text-center focus:bg-white focus:outline-sky-200 rounded resize-none overflow-hidden min-h-[36px] align-middle" onInput={(e) => { const t = e.target as HTMLTextAreaElement; t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; }} />
                       </td>
-                      <td className="p-2 border-r border-sky-100 text-center">
-                        <input type="text" value={pattern.yarn} onChange={(e) => handleCellChange(pattern.id, 'yarn', e.target.value)} className="w-full bg-transparent px-2 py-1 font-medium text-gray-900 text-center focus:bg-white focus:outline-sky-200 rounded" />
+                      <td className="p-1 border-r border-sky-100">
+                        <textarea rows={1} value={pattern.yarn} onChange={(e) => handleCellChange(pattern.id, 'yarn', e.target.value)} className="w-full bg-transparent px-1.5 py-1 font-medium text-gray-900 text-center focus:bg-white focus:outline-sky-200 rounded resize-none overflow-hidden min-h-[36px] align-middle" onInput={(e) => { const t = e.target as HTMLTextAreaElement; t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; }} />
                       </td>
-                      <td className="p-2 border-r border-sky-100 text-center">
-                        <input type="text" value={pattern.yarnComponent} onChange={(e) => handleCellChange(pattern.id, 'yarnComponent', e.target.value)} className="w-full bg-transparent px-2 py-1 font-medium text-gray-900 text-center focus:bg-white focus:outline-sky-200 rounded" />
+                      <td className="p-1 border-r border-sky-100">
+                        <textarea rows={1} value={pattern.yarnComponent} onChange={(e) => handleCellChange(pattern.id, 'yarnComponent', e.target.value)} className="w-full bg-transparent px-1.5 py-1 font-medium text-gray-900 text-center focus:bg-white focus:outline-sky-200 rounded resize-none overflow-hidden min-h-[36px] align-middle" onInput={(e) => { const t = e.target as HTMLTextAreaElement; t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; }} />
                       </td>
-                      <td className="p-2 border-r border-sky-100 text-center">
-                        <input type="text" value={pattern.note} onChange={(e) => handleCellChange(pattern.id, 'note', e.target.value)} className="w-full bg-transparent px-2 py-1 font-medium text-gray-900 text-center focus:bg-white focus:outline-sky-200 rounded" />
+                      <td className="p-1 border-r border-sky-100">
+                        <textarea rows={1} value={pattern.note} onChange={(e) => handleCellChange(pattern.id, 'note', e.target.value)} className="w-full bg-transparent px-1.5 py-1 font-medium text-gray-900 text-center focus:bg-white focus:outline-sky-200 rounded resize-none overflow-hidden min-h-[36px] align-middle" onInput={(e) => { const t = e.target as HTMLTextAreaElement; t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; }} />
                       </td>
-                      <td className="p-2 border-r border-sky-100 text-center">
+                      <td className="p-1 border-r border-sky-100 text-center">
                         <div className="flex justify-center items-center">
                           {pattern.imageUrl ? (
-                            <img src={pattern.imageUrl} alt="preview" className="w-10 h-10 object-cover rounded-lg border border-sky-200 shadow-sm" />
+                            <img src={pattern.imageUrl} alt="preview" className="w-9_ h-9 object-cover rounded-lg border border-sky-200 shadow-sm" />
                           ) : (
-                            <span className="text-gray-400">-</span>
+                            <span className="text-gray-400 text-xs">-</span>
                           )}
                         </div>
                       </td>
-                      <td className="p-2 text-center">
+                      <td className="p-1 text-center">
                         <button onClick={() => deleteRow(pattern.id)} className="text-gray-400 hover:text-red-400 p-1 transition-colors">
                           <Trash2 className="w-4 h-4" />
                         </button>
