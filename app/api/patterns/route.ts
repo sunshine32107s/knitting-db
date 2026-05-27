@@ -3,7 +3,7 @@ import { PrismaClient } from '@prisma/client';
 
 // 서버리스 환경 최적화 인스턴스 생성
 const globalForPrisma = global as unknown as { prisma: PrismaClient };
-export const prisma = globalForPrisma.prisma || new PrismaClient();
+const const prisma = globalForPrisma.prisma || new PrismaClient();
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
 
 // 1. 전체 도안 불러오기
