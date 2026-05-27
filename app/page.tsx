@@ -56,6 +56,37 @@ export default function Home() {
     };
   }, [patterns]);
 
+  // 📋 [신규] 화면 어디서든 이미지를 붙여넣었을 때, 현재 마우스가 위치한 행을 찾아 사진을 매칭해주는 글로벌 감지 장치
+  useEffect(() => {
+    const handleGlobalPaste = async (e: ClipboardEvent) => {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+
+      // 마우스가 올라가 있는 가장 가까운 행(tr)의 data-id 구하기
+      const hoveredRow = document.querySelector('tr:hover');
+      if (!hoveredRow) return;
+      
+      const patternId = hoveredRow.getAttribute('data-id');
+      if (!patternId) return;
+
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].type.indexOf('image') !== -1) {
+          const file = items[i].getAsFile();
+          if (file) {
+            e.preventDefault();
+            await handleRowImageUpload(Number(patternId), file);
+            break;
+          }
+        }
+      }
+    };
+
+    window.addEventListener('paste', handleGlobalPaste);
+    return () => {
+      window.removeEventListener('paste', handleGlobalPaste);
+    };
+  }, [patterns]);
+
   const fetchPatterns = async () => {
     try {
       setDataLoading(true);
@@ -160,22 +191,6 @@ export default function Home() {
     }
   };
 
-  const handlePasteImage = async (id: number, e: React.ClipboardEvent) => {
-    const items = e.clipboardData?.items;
-    if (!items) return;
-
-    for (let i = 0; i < items.length; i++) {
-      if (items[i].type.indexOf('image') !== -1) {
-        const file = items[i].getAsFile();
-        if (file) {
-          e.preventDefault();
-          await handleRowImageUpload(id, file);
-          break;
-        }
-      }
-    }
-  };
-
   const deleteRow = async (id: number) => {
     setPatterns((prev) => prev.filter((item) => item.id !== id));
     try {
@@ -240,6 +255,20 @@ export default function Home() {
     });
   };
 
+  // 📐 [신규] 텍스트 입력창 내부의 하트 이모지만 실시간으로 작게 만들고 위로 올리는 커스텀 가공 렌더러
+  const formatGaugeDisplay = (gaugeText: string) => {
+    if (!gaugeText.includes('💙')) return gaugeText;
+    
+    const parts = gaugeText.split('💙');
+    return (
+      <span className="inline-flex items-center justify-center font-semibold text-gray-500 text-sm">
+        {parts[0]}
+        <span className="inline-block align-middle transform -translate-y-[0.5px] mx-[1px] text-[10px] select-none text-sky-500">💙</span>
+        {parts[1]}
+      </span>
+    );
+  };
+
   const sortedPatterns = getSortedPatterns();
 
   return (
@@ -259,7 +288,7 @@ export default function Home() {
 
         <div 
           onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
-          onDragLeave={() => setDragActive(false)}
+          onDragLeave={() => dragActive = false}
           onDrop={(e) => { e.preventDefault(); setDragActive(false); if(e.dataTransfer.files?.[0]) handleFileUpload(e.dataTransfer.files[0]); }}
           className={`border-2 border-dashed rounded-xl p-3.5 text-center cursor-pointer transition-all shadow-sm ${
             dragActive ? 'border-sky-400 bg-sky-50/50' : 'border-sky-200 bg-white/80 backdrop-blur-sm hover:border-sky-300'
@@ -323,15 +352,20 @@ export default function Home() {
                   </tr>
                 ) : (
                   sortedPatterns.map((pattern) => (
-                    <tr key={pattern.id} className="border-b border-sky-50 hover:bg-sky-50/30 transition-colors text-sm">
+                    // 📋 [수정] 글로벌 붙여넣기 기능이 행을 식별할 수 있도록 data-id 속성을 부여했습니다.
+                    <tr key={pattern.id} data-id={pattern.id} className="border-b border-sky-50 hover:bg-sky-50/30 transition-colors text-sm group/row">
                       <td className="p-1 border-r border-sky-100">
                         <div className="flex items-center justify-center min-h-[34px] w-full">
                           <textarea rows={1} value={pattern.name} onChange={(e) => handleCellChange(pattern.id, 'name', e.target.value)} className="w-full bg-transparent px-1.5 py-1 font-bold text-blue-700 text-center focus:bg-white focus:outline-sky-200 rounded resize-none overflow-hidden text-sm" onInput={(e) => { const t = e.target as HTMLTextAreaElement; t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; }} />
                         </div>
                       </td>
-                      <td className="p-1 border-r border-sky-100">
-                        <div className="flex items-center justify-center min-h-[34px] w-full">
-                          <textarea rows={1} value={pattern.gauge} onChange={(e) => handleCellChange(pattern.id, 'gauge', e.target.value)} className="w-full bg-transparent px-1.5 py-1 font-semibold text-gray-500 text-center focus:bg-white focus:outline-sky-200 rounded resize-none overflow-hidden text-sm" onInput={(e) => { const t = e.target as HTMLTextAreaElement; t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; }} />
+                      {/* 📐 [하트 교정] 이제 게이지는 편집중이 아닐 때는 가공된 하트를, 편집할 때는 원래 텍스트를 보여주어 정렬 밸런스를 맞춥니다. */}
+                      <td className="p-1 border-r border-sky-100 relative">
+                        <div className="flex items-center justify-center min-h-[34px] w-full relative group">
+                          <textarea rows={1} value={pattern.gauge} onChange={(e) => handleCellChange(pattern.id, 'gauge', e.target.value)} className="w-full bg-transparent px-1.5 py-1 font-semibold text-gray-500 text-center focus:bg-white focus:outline-sky-200 rounded resize-none overflow-hidden text-sm focus:opacity-100 opacity-0 absolute inset-0 z-10" onInput={(e) => { const t = e.target as HTMLTextAreaElement; t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; }} />
+                          <div className="pointer-events-none w-full text-center py-1 select-none block group-focus-within:hidden z-0">
+                            {formatGaugeDisplay(pattern.gauge)}
+                          </div>
                         </div>
                       </td>
                       <td className="p-1 border-r border-sky-100">
@@ -357,21 +391,21 @@ export default function Home() {
                       <td className="p-1 border-r border-sky-100 text-center">
                         <div className="flex justify-center items-center min-h-[34px] w-full">
                           <input type="file" accept="image/*" className="hidden" ref={(el) => { rowImageInputRef.current[pattern.id] = el; }} onChange={(e) => { if (e.target.files?.[0]) handleRowImageUpload(pattern.id, e.target.files[0]); }} />
+                          {/* 📋 마우스를 올린 행 전체가 복사붙여넣기 핫스팟이 되므로, 버튼 클릭 시에만 안전하게 파일창을 엽니다. */}
                           <button 
                             onClick={() => rowImageInputRef.current[pattern.id]?.click()} 
-                            onPaste={(e) => handlePasteImage(pattern.id, e)}
-                            className="group relative flex items-center justify-center w-8 h-8 rounded-lg border border-sky-200 bg-sky-50/30 hover:bg-sky-100/50 focus:outline-sky-300 focus:ring-1 focus:ring-sky-300 transition-all overflow-hidden shadow-sm" 
-                            title="클릭해서 업로드하거나, 포커스 후 Ctrl+V로 이미지 붙여넣기"
+                            className="group/btn relative flex items-center justify-center w-8 h-8 rounded-lg border border-sky-200 bg-sky-50/30 hover:bg-sky-100/50 transition-all overflow-hidden shadow-sm" 
+                            title="클릭 시 파일 선택 업로드 가능, 혹은 이 행에 마우스를 대고 Ctrl+V"
                           >
                             {pattern.imageUrl ? (
                               <>
-                                <img src={pattern.imageUrl} alt="preview" className="w-full h-full object-cover group-hover:opacity-40 transition-opacity" />
-                                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                <img src={pattern.imageUrl} alt="preview" className="w-full h-full object-cover group-hover/btn:opacity-40 transition-opacity" />
+                                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/btn:opacity-100 transition-opacity">
                                   <Camera className="w-3.5 h-3.5 text-sky-700" />
                                 </div>
                               </>
                             ) : (
-                              <Camera className="w-4 h-4 text-sky-400 group-hover:text-sky-600 transition-colors" />
+                              <Camera className="w-4 h-4 text-sky-400 group-hover/btn:text-sky-600 transition-colors" />
                             )}
                           </button>
                         </div>
