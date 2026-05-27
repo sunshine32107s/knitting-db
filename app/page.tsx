@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Upload, Plus, Trash2, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { Upload, Plus, Trash2, ArrowUpDown, ArrowUp, ArrowDown, Camera } from 'lucide-react';
 
 interface Pattern {
   id: number;
@@ -27,6 +27,7 @@ export default function Home() {
   const [sortOrder, setSortOrder] = useState<SortOrder>(null);
 
   const tableBodyRef = useRef<HTMLTableSectionElement>(null);
+  const rowImageInputRef = useRef<{ [key: number]: HTMLInputElement | null }>({});
 
   useEffect(() => {
     fetchPatterns();
@@ -85,11 +86,6 @@ export default function Home() {
     formData.append('file', file);
 
     try {
-      let imageUrl = '';
-      if (file.type.startsWith('image/')) {
-        imageUrl = await fileToDataUrl(file);
-      }
-
       const response = await fetch('/api/analyze', {
         method: 'POST',
         body: formData,
@@ -97,7 +93,12 @@ export default function Home() {
       if (!response.ok) throw new Error('분석 실패');
       
       const aiResult = await response.json();
-      const displayGauge = aiResult.gauge || '-';
+      
+      // 🔢 [수정] 게이지에 빈칸이 생기지 않도록 가로막는 안전장치 적용
+      let displayGauge = aiResult.gauge ? String(aiResult.gauge).trim() : '';
+      if (!displayGauge || displayGauge === '-') {
+        displayGauge = '0'; 
+      }
 
       const newPattern = {
         name: aiResult.name || '새 도안 항목',
@@ -106,7 +107,7 @@ export default function Home() {
         yarn: aiResult.yarn || '-',
         yarnComponent: aiResult.yarnComponent || '-',
         note: aiResult.note || '-',
-        imageUrl: imageUrl || ''
+        imageUrl: '' // 착샷은 사용자가 직접 수동으로 올릴 수 있게 깨끗하게 비워서 시작
       };
 
       const saveResponse = await fetch('/api/patterns', {
@@ -142,6 +143,27 @@ export default function Home() {
     }
   };
 
+  // 📸 [신규] 사용자가 행 안에서 직접 착샷 사진을 선택해 저장하는 함수
+  const handleRowImageUpload = async (id: number, file: File) => {
+    try {
+      const base64Url = await fileToDataUrl(file);
+      
+      // 화면 실시간 업데이트
+      setPatterns((prev) =>
+        prev.map((item) => (item.id === id ? { ...item, imageUrl: base64Url } : item))
+      );
+
+      // DB 진짜로 저장
+      await fetch('/api/patterns', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, field: 'imageUrl', value: base64Url }),
+      });
+    } catch (error) {
+      alert('이미지 업로드에 실패했습니다.');
+    }
+  };
+
   const deleteRow = async (id: number) => {
     setPatterns((prev) => prev.filter((item) => item.id !== id));
     try {
@@ -154,7 +176,7 @@ export default function Home() {
   const handleAddRow = async () => {
     const emptyRow = {
       name: '새 도안 항목',
-      gauge: '',
+      gauge: '0', // 수동 추가할 때도 빈칸 생기지 않게 기본값 고정
       type: '',
       yarn: '',
       yarnComponent: '',
@@ -251,7 +273,6 @@ export default function Home() {
           <div className="overflow-x-auto w-full">
             <table className="w-full border-collapse table-fixed min-w-[850px]">
               <thead>
-                {/* 📐 [구조 개편] 순서를 '이름 ➡️ 게이지 ➡️ 종류 ➡️ 특징(note)' 순서로 재배치했습니다. */}
                 <tr className="bg-sky-50/70 border-b border-sky-100 text-sky-950 font-bold text-center text-sm select-none">
                   <th className="p-1.5 border-r border-sky-100 w-[18%] cursor-pointer hover:bg-sky-100/50 transition-colors" onClick={() => handleSort('name')}>
                     <div className="flex items-center justify-center gap-1">이름 {renderSortIcon('name')}</div>
@@ -296,7 +317,7 @@ export default function Home() {
                           <textarea rows={1} value={pattern.name} onChange={(e) => handleCellChange(pattern.id, 'name', e.target.value)} className="w-full bg-transparent px-1.5 py-1 font-bold text-blue-700 text-center focus:bg-white focus:outline-sky-200 rounded resize-none overflow-hidden text-sm" onInput={(e) => { const t = e.target as HTMLTextAreaElement; t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; }} />
                         </div>
                       </td>
-                      {/* 📐 [수정] 모든 내용의 글자 색상을 부드러운 진회색인 text-gray-700으로 고치고, 두께를 단정한 font-semibold로 설정 완료! */}
+                      {/* 🎨 [수정] 본문 텍스트 색상을 완벽한 감성 조합인 text-gray-500 및 font-semibold로 전면 교정 완료! */}
                       <td className="p-1 border-r border-sky-100">
                         <div className="flex items-center justify-center min-h-[34px] w-full">
                           <textarea rows={1} value={pattern.gauge} onChange={(e) => handleCellChange(pattern.id, 'gauge', e.target.value)} className="w-full bg-transparent px-1.5 py-1 font-semibold text-gray-500 text-center focus:bg-white focus:outline-sky-200 rounded resize-none overflow-hidden text-sm" onInput={(e) => { const t = e.target as HTMLTextAreaElement; t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; }} />
@@ -307,7 +328,6 @@ export default function Home() {
                           <textarea rows={1} value={pattern.type} onChange={(e) => handleCellChange(pattern.id, 'type', e.target.value)} className="w-full bg-transparent px-1.5 py-1 font-semibold text-gray-500 text-center focus:bg-white focus:outline-sky-200 rounded resize-none overflow-hidden text-sm" onInput={(e) => { const t = e.target as HTMLTextAreaElement; t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; }} />
                         </div>
                       </td>
-                      {/* 📐 '특징(note)' 칸이 '종류' 바로 다음 순서로 이동해 조화롭게 정렬됩니다. */}
                       <td className="p-1 border-r border-sky-100">
                         <div className="flex items-center justify-center min-h-[34px] w-full">
                           <textarea rows={1} value={pattern.note} onChange={(e) => handleCellChange(pattern.id, 'note', e.target.value)} className="w-full bg-transparent px-1.5 py-1 font-semibold text-gray-500 text-center focus:bg-white focus:outline-sky-200 rounded resize-none overflow-hidden text-sm" onInput={(e) => { const t = e.target as HTMLTextAreaElement; t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; }} />
@@ -323,18 +343,27 @@ export default function Home() {
                           <textarea rows={1} value={pattern.yarnComponent} onChange={(e) => handleCellChange(pattern.id, 'yarnComponent', e.target.value)} className="w-full bg-transparent px-1.5 py-1 font-semibold text-gray-500 text-center focus:bg-white focus:outline-sky-200 rounded resize-none overflow-hidden text-sm" onInput={(e) => { const t = e.target as HTMLTextAreaElement; t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; }} />
                         </div>
                       </td>
+                      {/* 📸 [수정] 착샷 칸을 누르면 수동으로 내 뜨개 사진을 즉시 업로드할 수 있는 대공사 반영 */}
                       <td className="p-1 border-r border-sky-100 text-center">
                         <div className="flex justify-center items-center min-h-[34px] w-full">
-                          {pattern.imageUrl ? (
-                            <img src={pattern.imageUrl} alt="preview" className="w-8 h-8 object-cover rounded-lg border border-sky-200 shadow-sm" />
-                          ) : (
-                            <span className="text-gray-500 font-semibold text-xs">-</span>
-                          )}
+                          <input type="file" accept="image/*" className="hidden" ref={(el) => { rowImageInputRef.current[pattern.id] = el; }} onChange={(e) => { if (e.target.files?.[0]) handleRowImageUpload(pattern.id, e.target.files[0]); }} />
+                          <button onClick={() => rowImageInputRef.current[pattern.id]?.click()} className="group relative flex items-center justify-center w-8 h-8 rounded-lg border border-sky-200 bg-sky-50/30 hover:bg-sky-100/50 transition-all overflow-hidden shadow-sm" title="착샷 올리기">
+                            {pattern.imageUrl ? (
+                              <>
+                                <img src={pattern.imageUrl} alt="preview" className="w-full h-full object-cover group-hover:opacity-40 transition-opacity" />
+                                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <Camera className="w-3.5 h-3.5 text-sky-700" />
+                                </div>
+                              </>
+                            ) : (
+                              <Camera className="w-4 h-4 text-sky-400 group-hover:text-sky-600 transition-colors" />
+                            )}
+                          </button>
                         </div>
                       </td>
                       <td className="p-1 text-center">
                         <div className="flex justify-center items-center min-h-[34px] w-full">
-                          <button onClick={() => deleteRow(pattern.id)} className="text-gray-400 hover:text-red-500 p-1 transition-colors">
+                          <button onClick={() => deleteRow(pattern.id)} className="text-neutral-400 hover:text-red-500 p-1 transition-colors">
                             <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
