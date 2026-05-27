@@ -54,10 +54,18 @@ export default function Home() {
       
       const aiResult = await response.json();
 
+      // [변경] 만약 AI 분석 결과에 무늬 게이지 성격이 감지되면 표기 방식 보완
+      let displayGauge = aiResult.gauge || '-';
+      if (aiResult.isPatternGauge || displayGauge.includes('무늬') || displayGauge.includes('pattern')) {
+        if (!displayGauge.includes('무늬')) {
+          displayGauge = `${displayGauge} (무늬)`;
+        }
+      }
+
       const newPattern: Pattern = {
         id: Date.now(),
         name: aiResult.name || '새 도안 항목',
-        gauge: aiResult.gauge || '-',
+        gauge: displayGauge,
         type: aiResult.type || '미분류',
         yarn: aiResult.yarn || '-',
         yarnComponent: aiResult.yarnComponent || '-',
@@ -96,10 +104,10 @@ export default function Home() {
 
       <div className="max-w-7xl mx-auto space-y-6 custom-cute-font text-base">
         
-        {/* 대제목 영역 - 깔끔하게 오류 코드만 청소 완료 */}
-        <div className="flex items-center gap-3">
+        {/* 대제목 영역 - 고래 크기 1.5배 업그레이드 (w-16 h-16) 및 정렬 미세조정 */}
+        <div className="flex items-center gap-4">
           <h1 className="text-3xl font-bold text-sky-900 tracking-tight">고래고래 도안 저장소</h1>
-          <img src="/whale_m.gif" alt="title whale" className="w-10 h-10 object-contain" />
+          <img src="/whale_m.gif" alt="title whale" className="w-16 h-16 object-contain" />
         </div>
         <p className="text-sm text-sky-600/80 mt-1">도안을 업로드하면 AI가 정리해 줍니다. 직접 수정도 가능해요!</p>
 
