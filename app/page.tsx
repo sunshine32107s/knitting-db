@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Upload, Plus, Trash2 } from 'lucide-react';
+import { Upload, Plus, Trash2, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 
 interface Pattern {
   id: number;
@@ -14,14 +14,19 @@ interface Pattern {
   imageUrl?: string;
 }
 
+type SortField = 'name' | 'gauge' | 'type' | 'yarn' | 'yarnComponent' | 'note';
+type SortOrder = 'asc' | 'desc' | null;
+
 export default function Home() {
-  // [수정] 처음에 예시 데이터 4개를 보여주던 배열을 완전히 비우고, 로딩 표시를 추가합니다.
   const [patterns, setPatterns] = useState<Pattern[]>([]);
   const [loading, setLoading] = useState(false);
-  const [dataLoading, setDataLoading] = useState(true); // DB 로딩 상태
+  const [dataLoading, setDataLoading] = useState(true);
   const [dragActive, setDragActive] = useState(false);
 
-  // 🏛️ 사이트 열리자마자 진짜 DB 창고에서 도안 리스트 가져오기
+  // ↕️ 정렬 상태 정하기 (어떤 필드인지, 오름차순인지 내림차순인지)
+  const [sortField, setSortField] = useState<SortField | null>(null);
+  const [sortOrder, setSortOrder] = useState<SortOrder>(null);
+
   useEffect(() => {
     fetchPatterns();
   }, []);
@@ -50,7 +55,6 @@ export default function Home() {
     });
   };
 
-  // 🐳 도안 업로드 및 AI 분석 후 DB 자동 저장
   const handleFileUpload = async (file: File) => {
     setLoading(true);
     const formData = new FormData();
@@ -87,7 +91,6 @@ export default function Home() {
         imageUrl: imageUrl || ''
       };
 
-      // 💾 DB에 데이터 진짜로 저장하기
       const saveResponse = await fetch('/api/patterns', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -95,7 +98,7 @@ export default function Home() {
       });
 
       if (saveResponse.ok) {
-        fetchPatterns(); // 등록 후 최신 목록 다시 로드
+        fetchPatterns();
       }
     } catch (error) {
       alert('도안을 읽거나 저장하는 중 오류가 발생했습니다.');
@@ -104,7 +107,6 @@ export default function Home() {
     }
   };
 
-  // ✏️ 셀 내용 수정 시 DB 실시간 업데이트
   const handleCellChange = async (id: number, field: keyof Pattern, value: string) => {
     setPatterns((prev) =>
       prev.map((item) => (item.id === id ? { ...item, [field]: value } : item))
@@ -121,7 +123,6 @@ export default function Home() {
     }
   };
 
-  // 🗑️ 도안 삭제
   const deleteRow = async (id: number) => {
     setPatterns((prev) => prev.filter((item) => item.id !== id));
     try {
@@ -131,7 +132,6 @@ export default function Home() {
     }
   };
 
-  // ➕ 빈 항목 수동 추가
   const handleAddRow = async () => {
     const emptyRow = {
       name: '새 도안 항목',
@@ -155,6 +155,43 @@ export default function Home() {
     }
   };
 
+  // ↕️ 클릭 시 정렬 상태를 토글해 주는 함수
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      if (sortOrder === 'asc') setSortOrder('desc');
+      else if (sortOrder === 'desc') {
+        setSortField(null);
+        setSortOrder(null);
+      }
+    } else {
+      setSortField(field);
+      setSortOrder('asc');
+    }
+  };
+
+  // ↕️ 정렬 아이콘을 동적으로 그려주는 함수
+  const renderSortIcon = (field: SortField) => {
+    if (sortField !== field) return <ArrowUpDown className="w-3.5 h-3.5 text-gray-400" />;
+    if (sortOrder === 'asc') return <ArrowUp className="w-3.5 h-3.5 text-blue-600" />;
+    return <ArrowDown className="w-3.5 h-3.5 text-blue-600" />;
+  };
+
+  // ↕️ 현재 정렬 기준에 맞춰 데이터를 줄 세워주는 함수
+  const getSortedPatterns = () => {
+    if (!sortField || !sortOrder) return patterns;
+
+    return [...patterns].sort((a, b) => {
+      const valueA = String(a[sortField] || '').toLowerCase();
+      const valueB = String(b[sortField] || '').toLowerCase();
+
+      if (valueA < valueB) return sortOrder === 'asc' ? -1 : 1;
+      if (valueA > valueB) return sortOrder === 'asc' ? 1 : -1;
+      return 0;
+    });
+  };
+
+  const sortedPatterns = getSortedPatterns();
+
   return (
     <div className="min-h-screen bg-gradient-to-tr from-sky-100 via-blue-50 to-emerald-50 p-8 text-gray-900 font-sans tracking-wide">
       <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet" />
@@ -166,7 +203,7 @@ export default function Home() {
           <h1 className="text-3xl font-bold text-sky-900 tracking-tight">고래고래 도안 저장소</h1>
           <img src="/whale_m.gif" alt="title whale" className="w-16 h-16 object-contain" />
         </div>
-        <p className="text-sm text-sky-600/80 mt-1">도안을 업로드하면 AI가 정리해 줍니다. 평생 보관이 가능해요!</p>
+        <p className="text-sm text-sky-600/80 mt-1">도안을 업로드하면 AI가 정리해 줍니다. 헤더를 클릭해 정렬해 보세요!</p>
 
         <div 
           onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
@@ -182,7 +219,7 @@ export default function Home() {
           {loading ? (
             <div className="flex flex-row items-center justify-center gap-3 py-1">
               <img src="/whale.gif" alt="whale loading" className="w-12 h-12 object-contain" />
-              <p className="text-sm font-medium text-sky-800">고래가 도안을 열심히 읽고 있어요...</p>
+              <p className="text-sm font-medium text-sky-800">고래가 코수와 단수를 꼼꼼히 확인하고 있어요...</p>
             </div>
           ) : (
             <div className="flex items-center justify-center gap-2 py-1">
@@ -196,13 +233,26 @@ export default function Home() {
           <div className="overflow-x-auto">
             <table className="w-full border-collapse table-fixed min-w-[900px]">
               <thead>
-                <tr className="bg-sky-50/70 border-b border-sky-100 text-sky-950 font-bold text-center text-base">
-                  <th className="p-3 border-r border-sky-100 w-[22%]">이름</th>
-                  <th className="p-3 border-r border-sky-100 w-[12%]">게이지</th>
-                  <th className="p-3 border-r border-sky-100 w-[13%]">종류</th>
-                  <th className="p-3 border-r border-sky-100 w-[15%]">원작 실</th>
-                  <th className="p-3 border-r border-sky-100 w-[15%]">원작 실 성분</th>
-                  <th className="p-3 border-r border-sky-100 w-[15%]">특징</th>
+                <tr className="bg-sky-50/70 border-b border-sky-100 text-sky-950 font-bold text-center text-base select-none">
+                  {/* [정렬 기능 구현] 클릭하면 정렬되는 헤더 컬럼들 */}
+                  <th className="p-3 border-r border-sky-100 w-[22%] cursor-pointer hover:bg-sky-100/50 transition-colors" onClick={() => handleSort('name')}>
+                    <div className="flex items-center justify-center gap-1">이름 {renderSortIcon('name')}</div>
+                  </th>
+                  <th className="p-3 border-r border-sky-100 w-[12%] cursor-pointer hover:bg-sky-100/50 transition-colors" onClick={() => handleSort('gauge')}>
+                    <div className="flex items-center justify-center gap-1">게이지 {renderSortIcon('gauge')}</div>
+                  </th>
+                  <th className="p-3 border-r border-sky-100 w-[13%] cursor-pointer hover:bg-sky-100/50 transition-colors" onClick={() => handleSort('type')}>
+                    <div className="flex items-center justify-center gap-1">종류 {renderSortIcon('type')}</div>
+                  </th>
+                  <th className="p-3 border-r border-sky-100 w-[15%] cursor-pointer hover:bg-sky-100/50 transition-colors" onClick={() => handleSort('yarn')}>
+                    <div className="flex items-center justify-center gap-1">원작 실 {renderSortIcon('yarn')}</div>
+                  </th>
+                  <th className="p-3 border-r border-sky-100 w-[15%] cursor-pointer hover:bg-sky-100/50 transition-colors" onClick={() => handleSort('yarnComponent')}>
+                    <div className="flex items-center justify-center gap-1">원작 실 성분 {renderSortIcon('yarnComponent')}</div>
+                  </th>
+                  <th className="p-3 border-r border-sky-100 w-[15%] cursor-pointer hover:bg-sky-100/50 transition-colors" onClick={() => handleSort('note')}>
+                    <div className="flex items-center justify-center gap-1">특징 {renderSortIcon('note')}</div>
+                  </th>
                   <th className="p-3 border-r border-sky-100 w-[8%]">착샷</th>
                   <th className="p-3 w-[5%]">삭제</th>
                 </tr>
@@ -214,14 +264,14 @@ export default function Home() {
                       창고에서 도안 데이터를 불러오는 중입니다...
                     </td>
                   </tr>
-                ) : patterns.length === 0 ? (
+                ) : sortedPatterns.length === 0 ? (
                   <tr>
                     <td colSpan={8} className="p-8 text-center text-gray-400 text-sm">
                       아직 저장된 도안이 없습니다. 첫 도안을 등록해 보세요! 🧶
                     </td>
                   </tr>
                 ) : (
-                  patterns.map((pattern) => (
+                  sortedPatterns.map((pattern) => (
                     <tr key={pattern.id} className="border-b border-sky-50 hover:bg-sky-50/30 transition-colors text-base">
                       <td className="p-2 border-r border-sky-100 text-center">
                         <input type="text" value={pattern.name} onChange={(e) => handleCellChange(pattern.id, 'name', e.target.value)} className="w-full bg-transparent px-2 py-1 font-bold text-blue-600 text-center focus:bg-white focus:outline-sky-200 rounded" />
