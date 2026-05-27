@@ -286,7 +286,7 @@ export default function Home() {
 
         <div 
           onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
-          onDragLeave={() => setDragActive(false)} // 👈 [수정 완료] 지난번 에러 났던 오타 교정함
+          onDragLeave={() => setDragActive(false)}
           onDrop={(e) => { e.preventDefault(); setDragActive(false); if(e.dataTransfer.files?.[0]) handleFileUpload(e.dataTransfer.files[0]); }}
           className={`border-2 border-dashed rounded-xl p-3.5 text-center cursor-pointer transition-all shadow-sm ${
             dragActive ? 'border-sky-400 bg-sky-50/50' : 'border-sky-200 bg-white/80 backdrop-blur-sm hover:border-sky-300'
@@ -384,7 +384,6 @@ export default function Home() {
                           <textarea rows={1} value={pattern.yarnComponent} onChange={(e) => handleCellChange(pattern.id, 'yarnComponent', e.target.value)} className="w-full bg-transparent px-1.5 py-1 font-semibold text-gray-500 text-center focus:bg-white focus:outline-sky-200 rounded resize-none overflow-hidden text-sm" onInput={(e) => { const t = e.target as HTMLTextAreaElement; t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; }} />
                         </div>
                       </td>
-                      {/* 🔍 [기능 업그레이드] 착샷 마우스 오버 시 공중 부양 미리보기 팝업 구현 */}
                       <td className="p-1 border-r border-sky-100 text-center relative">
                         <div className="flex justify-center items-center min-h-[34px] w-full">
                           <input type="file" accept="image/*" className="hidden" ref={(el) => { rowImageInputRef.current[pattern.id] = el; }} onChange={(e) => { if (e.target.files?.[0]) handleRowImageUpload(pattern.id, e.target.files[0]); }} />
@@ -407,16 +406,16 @@ export default function Home() {
                               )}
                             </button>
 
-                            {/* ✨ 마우스를 올렸을 때만 공중에 붕 뜨는 고해상도 미리보기 액자 태그 */}
+                            {/* 🛠️ [긴급 수정] 세로로 찌그러지지 않도록 min-width 확보 및 object-cover 강제 장착 */}
                             {pattern.imageUrl && (
                               <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover/preview:block z-50 pointer-events-none animate-in fade-in duration-200">
-                                <div className="p-1.5 bg-white border border-sky-200 rounded-xl shadow-xl bg-white/95 backdrop-blur-sm">
+                                <div className="p-2 bg-white border-2 border-sky-200 rounded-xl shadow-2xl bg-white/95 backdrop-blur-sm min-w-[200px]">
                                   <img 
                                     src={pattern.imageUrl} 
                                     alt="Large Preview" 
-                                    className="w-32 h-32 object-cover rounded-lg border border-sky-100"
+                                    className="w-48 h-48 object-cover rounded-lg border border-sky-100 block"
                                   />
-                                  <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-white border-b border-r border-sky-200 rotate-45"></div>
+                                  <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-2.5 h-2.5 bg-white border-b-2 border-r-2 border-sky-200 rotate-45"></div>
                                 </div>
                               </div>
                             )}
