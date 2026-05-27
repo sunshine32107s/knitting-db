@@ -288,7 +288,7 @@ export default function Home() {
 
         <div 
           onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
-          onDragLeave={() => dragActive = false}
+          onDragLeave={() => setDragActive(false)}
           onDrop={(e) => { e.preventDefault(); setDragActive(false); if(e.dataTransfer.files?.[0]) handleFileUpload(e.dataTransfer.files[0]); }}
           className={`border-2 border-dashed rounded-xl p-3.5 text-center cursor-pointer transition-all shadow-sm ${
             dragActive ? 'border-sky-400 bg-sky-50/50' : 'border-sky-200 bg-white/80 backdrop-blur-sm hover:border-sky-300'
