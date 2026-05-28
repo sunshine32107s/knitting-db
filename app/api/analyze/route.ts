@@ -22,18 +22,31 @@ export async function POST(request: Request) {
       }
     };
 
+    // 1. 🌟 구글 실시간 웹 검색(Google Search) 기능 활성화 및 정밀 분석
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
+      // config에 구글 검색 도구를 연결하여 최신/국산 실 성분까지 인터넷에서 실시간으로 긁어옵니다.
+      config: {
+        tools: [{ googleSearch: {} }]
+      },
       contents: [
         filePart,
-        `당신은 뜨개질 도안 전문 분석가입니다. 첨부된 파일(이미지 또는 PDF)을 분석하여 아래 JSON 구조로 응답해주세요.
+        `당신은 뜨개질 도안 및 글로벌/국산 실 정보 전문 분석가입니다. 첨부된 파일(이미지 또는 PDF)을 분석하여 아래 JSON 구조로 응답해주세요.
         
         [게이지(gauge) 규칙]:
         - '코', '단', 'sts', 'rows' 같은 문자는 무조건 제외하고 "오직 숫자와 파란하트(💙) 기호"만 넣으세요. 숫자와 기호 사이에 공백(띄어쓰기)은 절대 넣지 마세요. (예: 22💙30)
         - 게이지 정보가 전혀 발견되지 않는다면 무조건 숫자 '0' 하나만 적으세요.
 
-        [종류(type) 규칙]:
-        - 의류의 종류는 무조건 100% 한글로만 대답하세요. (예: 풀오버, 가디건, 조끼)
+        [종류(type) 예외 처리 규칙 🌟]:
+        - 의류의 종류는 반드시 아래 제공된 7개의 단어 중 도안과 가장 일치하는 딱 '하나'만 선택해서 대답해야 합니다. 새로운 단어를 임의로 만들어내면 절대 안 됩니다.
+        - 만약 도안이 소품도 아니고, 아래 옷 종류 중 그 어디에도 해당하지 않는 완전 엉뚱한 것이거나 판별하기 어렵다면 무조건 "기타"를 선택하세요.
+        - 허용된 종류 목록: ["스웨터", "대바늘 소품", "조끼", "가디건", "치우❤️", "탑", "기타"]
+
+        [원작 실 성분(yarnComponent) 및 비율 정렬 규칙 🌟]:
+        - 도안에 실 성분이 없더라도 구글 검색 도구를 활용해 인터넷에서 해당 원작 실의 성분을 반드시 찾아내세요.
+        - 찾아낸 실 성분을 적을 때는 반드시 **성분 비율(%)이 높은 순서대로** 내림차순 정렬하여 한글로 깔끔하게 나열해 주세요.
+        - 예시: "울 70% / 아크릴 20% / 나일론 10%" (반드시 높은 %가 앞으로 오게 정렬)
+        - 인터넷 검색으로도 도저히 찾을 수 없는 희귀 사설 실인 경우에만 "-"라고 적으세요.
 
         [영어 도안 판별 및 특징(note) 규칙 - 슬래시(/) 필수]:
         - 분석 중인 도안이 '영어'로 작성된 도안인지 확인하세요. 영어 도안인 경우, 'note' 칸의 가장 첫머리에 반드시 "영어" 단어를 넣으세요.
@@ -42,26 +55,73 @@ export async function POST(request: Request) {
         응답 형식(마크다운 태그 없이 순수 JSON만 응답):
         {
           "name": "도안 이름",
-          "gauge": "22💙30 또는 22 또는 0 형식의 공백 없는 순수 숫자와 하트 조합",
-          "isPatternGauge": 무늬게이지여부(true/false),
-          "type": "한글로 된 의류 종류",
+          "gauge": "22💙30 형식의 공백 없는 순수 숫자와 하트 조합",
+          "type": "허용된 7개 목록 중 하나",
           "yarn": "원작 실 이름",
-          "yarnComponent": "도안에서 찾아낸 실의 성분 정보",
+          "yarnComponent": "구글 검색을 통해 알아내고 % 높은 순으로 정렬한 실의 성분 정보",
           "note": "항목들을 쉼표가 아닌 ' / '로 구분한 핵심 특이사항 요약"
         }`
       ]
     });
 
     const text = response.text || '{}';
-    
-    // 🛠️ [교정] 끊어지고 깨졌던 정규식 한 줄을 깔끔하게 이어붙였습니다.
-    const cleanJson = text.replace(/```json|```/g, '').trim();
-    const result = JSON.parse(cleanJson);
+    const cleanJson = text.replace(/```json|
+```/g, '').trim();
+    const aiResult = JSON.parse(cleanJson);
 
-    return NextResponse.json(result);
+    // 2. 노션 환경변수 검증
+    const notionToken = process.env.NOTION_TOKEN;
+    const databaseId = process.env.NOTION_DATABASE_ID;
+
+    if (!notionToken || !databaseId) {
+      return NextResponse.json({ error: '노션 환경 변수 세팅이 누락되었습니다.' }, { status: 500 });
+    }
+
+    // 3. 노션 API를 통해 내 기존 뜨개질 표로 전송
+    const notionResponse = await fetch('https://api.notion.com/v1/pages', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${notionToken}`,
+        'Notion-Version': '2022-06-28',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        parent: { database_id: databaseId },
+        properties: {
+          "이름": {
+            title: [{ text: { content: aiResult.name || '이름 없는 도안' } }]
+          },
+          "게이지": {
+            rich_text: [{ text: { content: aiResult.gauge || '0' } }]
+          },
+          "종류": {
+            // AI가 7개 규칙 내에서 골라낸 태그가 정확하게 안착합니다 (예외시 '기타')
+            select: { name: aiResult.type || '기타' }
+          },
+          "원작 실": {
+            rich_text: [{ text: { content: aiResult.yarn || '-' } }]
+          },
+          "원작 실 성분": {
+            // 구글 검색으로 찾고 높은 비율 순으로 이쁘게 정렬된 텍스트가 안착합니다
+            rich_text: [{ text: { content: aiResult.yarnComponent || '-' } }]
+          },
+          "비고": {
+            rich_text: [{ text: { content: aiResult.note || '-' } }]
+          }
+        }
+      }),
+    });
+
+    if (!notionResponse.ok) {
+      const errorData = await notionResponse.json();
+      console.error('노션 API 전송 실패:', errorData);
+      return NextResponse.json({ error: '노션 전송 실패', details: errorData.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true, data: aiResult });
 
   } catch (error: any) {
-    console.error('AI 분석 에러:', error);
-    return NextResponse.json({ error: 'AI 분석 실패', details: error.message }, { status: 500 });
+    console.error('시스템 에러:', error);
+    return NextResponse.json({ error: '서버 에러 발생', details: error.message }, { status: 500 });
   }
 }
