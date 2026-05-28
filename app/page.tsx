@@ -155,7 +155,14 @@ export default function Home() {
   };
 
   const handleCellChange = async (id: number, field: keyof Pattern, value: string) => {
-    const cleanedValue = field === 'gauge' ? value.replace(/\s+/g, '') : value;
+    let cleanedValue = value;
+    if (field === 'gauge') {
+      cleanedValue = value.replace(/\s+/g, '');
+    }
+    // ✍️ [센스 추가] 사용자가 직접 타이핑할 때 쉼표(,)를 쓰면 자동으로 ' / '로 부드럽게 바꿔줍니다.
+    if (field === 'note') {
+      cleanedValue = value.replace(/,/g, ' / ');
+    }
 
     setPatterns((prev) =>
       prev.map((item) => (item.id === id ? { ...item, [field]: cleanedValue } : item))
@@ -235,9 +242,9 @@ export default function Home() {
   };
 
   const renderSortIcon = (field: SortField) => {
-    if (sortField !== field) return <ArrowUpDown className="w-3.5 h-3.5 text-gray-400" />;
-    if (sortOrder === 'asc') return <ArrowUp className="w-3.5 h-3.5 text-blue-700" />;
-    return <ArrowDown className="w-3.5 h-3.5 text-blue-700" />;
+    if (sortField !== field) return <ArrowUpDown className="w-3.5 h-3.5 text-gray-400"/>;
+    if (sortOrder === 'asc') return <ArrowUp className="w-3.5 h-3.5 text-blue-700"/>;
+    return <ArrowDown className="w-3.5 h-3.5 text-blue-700"/>;
   };
 
   const getSortedPatterns = () => {
@@ -301,15 +308,15 @@ export default function Home() {
             </div>
           ) : (
             <div className="flex items-center justify-center gap-2 py-1">
-              <Upload className="w-5 h-5 text-sky-400" />
+              <Upload className="w-5 h-5 text-sky-400"/>
               <p className="text-sm font-medium text-gray-700">여기에 도안 이미지나 PDF를 올려주세요. 채우는 건 AI가 할게요!</p>
             </div>
           )}
         </div>
 
-        {/* 📐 [수정] 표 바깥 박스의 overflow-hidden을 지우고 overflow-x-auto만 유지하여 팝업창 탈출 성공! */}
-        <div className="bg-white/95 backdrop-blur-sm border border-sky-100 rounded-2xl shadow-md w-full">
-          <div className="overflow-x-auto w-full rounded-2xl">
+        
+        <div className="bg-white/95 backdrop-blur-sm border border-sky-100 rounded-2xl shadow-md w-full relative">
+          <div className="w-full rounded-2xl">
             <table className="w-full border-collapse table-fixed min-w-[850px]">
               <thead>
                 <tr className="bg-sky-50/70 border-b border-sky-100 text-sky-950 font-bold text-center text-sm select-none">
@@ -398,24 +405,24 @@ export default function Home() {
                                 <>
                                   <img src={pattern.imageUrl} alt="preview" className="w-full h-full object-cover group-hover/btn:opacity-40 transition-opacity" />
                                   <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/btn:opacity-100 transition-opacity">
-                                    <Camera className="w-3.5 h-3.5 text-sky-700" />
+                                    <Camera className="w-3.5 h-3.5 text-sky-700"/>
                                   </div>
                                 </>
                               ) : (
-                                <Camera className="w-4 h-4 text-sky-400 group-hover/btn:text-sky-600 transition-colors" />
+                                <Camera className="w-4 h-4 text-sky-400 group-hover/btn:text-sky-600 transition-colors"/>
                               )}
                             </button>
 
-                            {/* 📐 [수정] 팝업 위치를 bottom-full에서 top-full(아래로 열림)로 바꾸고 최상위 z-50을 주어 표 테두리에 절대 안 잘리게 개조 */}
+                            
                             {pattern.imageUrl && (
-                              <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 hidden group-hover/preview:block z-50 pointer-events-none">
+                              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover/preview:block z-[100] pointer-events-none">
                                 <div className="p-2 bg-white border-2 border-sky-200 rounded-xl shadow-2xl bg-white/95 backdrop-blur-sm w-[208px]">
                                   <img 
                                     src={pattern.imageUrl} 
                                     alt="Large Preview" 
                                     className="w-48 h-48 object-cover rounded-lg border border-sky-100 block"
                                   />
-                                  <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-2.5 h-2.5 bg-white border-t-2 border-l-2 border-sky-200 rotate-45"></div>
+                                  <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-2.5 h-2.5 bg-white border-b-2 border-r-2 border-sky-200 rotate-45"></div>
                                 </div>
                               </div>
                             )}
@@ -426,7 +433,7 @@ export default function Home() {
                       <td className="p-1 text-center">
                         <div className="flex justify-center items-center min-h-[34px] w-full">
                           <button onClick={() => deleteRow(pattern.id)} className="text-neutral-400 hover:text-red-500 p-1 transition-colors">
-                            <Trash2 className="w-4 h-4" />
+                            <Trash2 className="w-4 h-4"/>
                           </button>
                         </div>
                       </td>
@@ -438,7 +445,7 @@ export default function Home() {
           </div>
           <div className="p-3 bg-sky-50/20 border-t border-sky-50">
             <button onClick={handleAddRow} className="flex items-center gap-1.5 text-sm text-sky-600 hover:text-sky-800 font-semibold transition-colors">
-              <Plus className="w-3.5 h-3.5" /> 새로 만들기
+              <Plus className="w-3.5 h-3.5"/> 새로 만들기
             </button>
           </div>
         </div>
