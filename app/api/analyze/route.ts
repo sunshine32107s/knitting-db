@@ -35,12 +35,9 @@ export async function POST(request: Request) {
         [종류(type) 규칙]:
         - 의류의 종류는 무조건 100% 한글로만 대답하세요. (예: 풀오버, 가디건, 조끼)
 
-        [영어 도안 판별 및 특징(note) 규칙 - 슬래시(/) 필수 🌟]:
+        [영어 도안 판별 및 특징(note) 규칙 - 슬래시(/) 필수]:
         - 분석 중인 도안이 '영어'로 작성된 도안인지 확인하세요. 영어 도안인 경우, 'note' 칸의 가장 첫머리에 반드시 "영어" 단어를 넣으세요.
-        - ⚠️ 중요: 특징 항목들을 나열할 때는 쉼표(,)를 절대로 사용하지 말고 슬래시 기호( / )로 구분해 주세요.
-          * 올바른 예 (영어 도안): "영어 / 4mm 바늘 사용 / 탑다운 구조"
-          * 올바른 예 (한글 도안): "4.5mm 바늘 사용 / 바텀업 구조 / 서술형 도안"
-          * 잘못된 예: "영어, 4mm 바늘, 탑다운" (쉼표 사용 절대 금지)
+        - 특징 항목들을 나열할 때는 쉼표(,)를 절대로 사용하지 말고 슬래시 기호( / )로 구분해 주세요. (예: "영어 / 4mm 바늘 사용 / 탑다운 구조")
 
         응답 형식(마크다운 태그 없이 순수 JSON만 응답):
         {
@@ -56,8 +53,9 @@ export async function POST(request: Request) {
     });
 
     const text = response.text || '{}';
-    const cleanJson = text.replace(/```json|
-```/g, '').trim();
+    
+    // 🛠️ [교정] 끊어지고 깨졌던 정규식 한 줄을 깔끔하게 이어붙였습니다.
+    const cleanJson = text.replace(/```json|```/g, '').trim();
     const result = JSON.parse(cleanJson);
 
     return NextResponse.json(result);
