@@ -22,10 +22,9 @@ export async function POST(request: Request) {
       }
     };
 
-    // 1. 🌟 구글 실시간 웹 검색(Google Search) 기능 활성화 및 정밀 분석
+    // 1. 구글 실시간 웹 검색(Google Search) 기능 활성화 및 정밀 분석
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
-      // config에 구글 검색 도구를 연결하여 최신/국산 실 성분까지 인터넷에서 실시간으로 긁어옵니다.
       config: {
         tools: [{ googleSearch: {} }]
       },
@@ -37,15 +36,14 @@ export async function POST(request: Request) {
         - '코', '단', 'sts', 'rows' 같은 문자는 무조건 제외하고 "오직 숫자와 파란하트(💙) 기호"만 넣으세요. 숫자와 기호 사이에 공백(띄어쓰기)은 절대 넣지 마세요. (예: 22💙30)
         - 게이지 정보가 전혀 발견되지 않는다면 무조건 숫자 '0' 하나만 적으세요.
 
-        [종류(type) 예외 처리 규칙 🌟]:
+        [종류(type) 예외 처리 규칙]:
         - 의류의 종류는 반드시 아래 제공된 7개의 단어 중 도안과 가장 일치하는 딱 '하나'만 선택해서 대답해야 합니다. 새로운 단어를 임의로 만들어내면 절대 안 됩니다.
         - 만약 도안이 소품도 아니고, 아래 옷 종류 중 그 어디에도 해당하지 않는 완전 엉뚱한 것이거나 판별하기 어렵다면 무조건 "기타"를 선택하세요.
         - 허용된 종류 목록: ["스웨터", "대바늘 소품", "조끼", "가디건", "치우❤️", "탑", "기타"]
 
-        [원작 실 성분(yarnComponent) 및 비율 정렬 규칙 🌟]:
+        [원작 실 성분(yarnComponent) 및 비율 정렬 규칙]:
         - 도안에 실 성분이 없더라도 구글 검색 도구를 활용해 인터넷에서 해당 원작 실의 성분을 반드시 찾아내세요.
-        - 찾아낸 실 성분을 적을 때는 반드시 **성분 비율(%)이 높은 순서대로** 내림차순 정렬하여 한글로 깔끔하게 나열해 주세요.
-        - 예시: "울 70% / 아크릴 20% / 나일론 10%" (반드시 높은 %가 앞으로 오게 정렬)
+        - 찾아낸 실 성분을 적을 때는 반드시 성분 비율(%)이 높은 순서대로 내림차순 정렬하여 한글로 깔끔하게 나열해 주세요. (예: "울 70% / 아크릴 20% / 나일론 10%")
         - 인터넷 검색으로도 도저히 찾을 수 없는 희귀 사설 실인 경우에만 "-"라고 적으세요.
 
         [영어 도안 판별 및 특징(note) 규칙 - 슬래시(/) 필수]:
@@ -65,8 +63,7 @@ export async function POST(request: Request) {
     });
 
     const text = response.text || '{}';
-    const cleanJson = text.replace(/```json|
-```/g, '').trim();
+    const cleanJson = text.replace(/```json|```/g, '').trim();
     const aiResult = JSON.parse(cleanJson);
 
     // 2. 노션 환경변수 검증
@@ -95,14 +92,12 @@ export async function POST(request: Request) {
             rich_text: [{ text: { content: aiResult.gauge || '0' } }]
           },
           "종류": {
-            // AI가 7개 규칙 내에서 골라낸 태그가 정확하게 안착합니다 (예외시 '기타')
             select: { name: aiResult.type || '기타' }
           },
           "원작 실": {
             rich_text: [{ text: { content: aiResult.yarn || '-' } }]
           },
           "원작 실 성분": {
-            // 구글 검색으로 찾고 높은 비율 순으로 이쁘게 정렬된 텍스트가 안착합니다
             rich_text: [{ text: { content: aiResult.yarnComponent || '-' } }]
           },
           "비고": {
